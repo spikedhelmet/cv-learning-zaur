@@ -16,10 +16,12 @@ We have a strict 2-month timeline to build a portfolio project (a full-stack Def
 - Installed baseline libraries (`numpy`, `opencv-python`, `matplotlib`).
 - Wrote and tested `day1_demo.py` which demonstrates basic image creation (NumPy array as a 500x500 canvas) and drawing a bounding box using OpenCV.
 - Mapped basic Python/NumPy concepts (like strictly typed matrices and BGR color space) to TypeScript and HTML5 Canvas paradigms.
-- Wrote `day2_image.py` which successfully loads a real image using `cv2.imread()`, gets its dimensions via NumPy `.shape`, and draws a simulated bounding box. 
+- Wrote `day2_image.py` which successfully loads a real image using `cv2.imread()`, gets its dimensions via NumPy `.shape`, and draws a simulated bounding box.
+- Successfully wrote `day2_webcam.py` to capture live video from the webcam using `cv2.VideoCapture(0)`.
+- Understood OpenCV idioms like `waitKey` masking and `cap.read()` destructuring.
+- Successfully implemented live real-time YOLO preprocessing (Grayscale, Resize 640x640, and Array slicing/cropping).
 
 ## Next Steps
-- Move from static images to a video stream (or webcam).
-- Start analyzing image manipulation techniques (e.g., cropping, resizing, grayscale) essential for preprocessing data for YOLO.
+- Learn to save/write modified video streams to a file on disk (crucial for recording drone flights and saving YOLO detection outputs).
 
 *Note for AI: When this repository is cloned on a new computer, read this file to instantly resume the 2-month roadmap and maintain the user's specific learning context.*

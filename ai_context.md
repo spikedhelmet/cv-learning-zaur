@@ -11,13 +11,15 @@ We have a strict 2-month timeline to build a portfolio project (a full-stack Def
 - **Core Concepts to master practically:** mAP, Loss, Overfitting, and Data Leakage.
 - **Production Awareness:** Prototype and train in Python, but keep in mind that production defense systems run on C++ (via ONNX/TensorRT) for edge hardware. Explain system architecture with this context.
 
-## Current Progress (Day 1)
+## Current Progress (Day 1 & Day 2)
 - We have set up a Python virtual environment (`cv-env`).
 - Installed baseline libraries (`numpy`, `opencv-python`, `matplotlib`).
 - Wrote and tested `day1_demo.py` which demonstrates basic image creation (NumPy array as a 500x500 canvas) and drawing a bounding box using OpenCV.
 - Mapped basic Python/NumPy concepts (like strictly typed matrices and BGR color space) to TypeScript and HTML5 Canvas paradigms.
+- Wrote `day2_image.py` which successfully loads a real image using `cv2.imread()`, gets its dimensions via NumPy `.shape`, and draws a simulated bounding box. 
 
 ## Next Steps
-- Continue down the Month 1 roadmap: reading actual images and video feeds, understanding image manipulation and filtering in OpenCV.
+- Move from static images to a video stream (or webcam).
+- Start analyzing image manipulation techniques (e.g., cropping, resizing, grayscale) essential for preprocessing data for YOLO.
 
 *Note for AI: When this repository is cloned on a new computer, read this file to instantly resume the 2-month roadmap and maintain the user's specific learning context.*

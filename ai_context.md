@@ -5,11 +5,14 @@ The user is a frontend developer (experienced in React Native, TypeScript, PHP, 
 
 ## Learning Style & Instructions for AI
 - Do not over-praise or "glaze." Be direct.
+- **CRITICAL**: This is a learning project. Do NOT directly edit the user's Python scripts to solve problems. Provide explanations, snippets, or guidance in chat, and let the user implement the code.
 - We have a full 8 weeks. Do not rush or skip content.
 - The detailed week-by-week plan lives in `roadmap.md`. Reference it before creating new tasks.
 - Each new task should be a new file (e.g., `week1_task3_thresholding.md`), not an overwrite of previous ones.
 - Map new concepts to TypeScript/Web equivalents when it helps understanding.
 - Focus on applied, hands-on engineering. Skip heavy math theory.
+- **Include occasional unguided challenges** — problems where the user must figure out the implementation without step-by-step code. This builds real problem-solving skill. Especially do it at the end of weeks.
+- **Provide supplemental theory references** where useful (interview prep, deeper understanding). Links, book chapters, papers, etc. Don't force it, but don't skip it when it matters.
 
 ## The 8-Week Roadmap
 See `roadmap.md` for the full breakdown. Summary:
@@ -28,8 +31,9 @@ See `roadmap.md` for the full breakdown. Summary:
 - IP Webcam URL format: `http://<phone-ip>:8080/video`
 
 ## Current Progress
-- **Week 1, Days 1-2 complete.** See `roadmap.md` for checked-off items.
-- Files written: `day1_demo.py`, `day2_image.py`, `day2_webcam.py`
-- Currently on: Week 1, remaining tasks (color spaces, thresholding, morphological ops, histograms)
+- **Week 1, Days 1-3 complete.** See `roadmap.md` for checked-off items.
+- Files written: `day1_demo.py`, `day2_image.py`, `day2_webcam.py`, `week1_color_spaces.py`
+- Completed: color spaces (HSV), thresholding (binary, Otsu, adaptive)
+- Currently on: Week 1, remaining tasks (morphological ops, histograms)
 
 *Note for AI: When this repository is cloned on a new computer, read this file and `roadmap.md` to instantly resume.*

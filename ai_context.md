@@ -11,7 +11,7 @@ The user is a frontend developer (experienced in React Native, TypeScript, PHP, 
 - Each new task should be a new file (e.g., `week1_task3_thresholding.md`), not an overwrite of previous ones.
 - Map new concepts to TypeScript/Web equivalents when it helps understanding.
 - Focus on applied, hands-on engineering. Skip heavy math theory.
-- **Include occasional unguided challenges** — problems where the user must figure out the implementation without step-by-step code. This builds real problem-solving skill. Especially do it at the end of weeks.
+- **Include occasional unguided challenges** — problems where the user must figure out the implementation without step-by-step code. This builds real problem-solving skill. Especially do it at the end of weeks. Occasional quizzes can also help.
 - **Provide supplemental theory references** where useful (interview prep, deeper understanding). Links, book chapters, papers, etc. Don't force it, but don't skip it when it matters.
 
 ## The 8-Week Roadmap

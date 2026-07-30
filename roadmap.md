@@ -14,8 +14,8 @@
 - [x] Live webcam capture (`VideoCapture`), frame loop, `waitKey` idioms
 - [x] Preprocessing pipeline: grayscale conversion, resize, crop
 - [x] Writing video to disk with `VideoWriter`
-- [ ] Color spaces: BGR vs HSV vs Grayscale — when and why each matters
-- [ ] Thresholding: binary, adaptive, Otsu's method
+- [x] Color spaces: BGR vs HSV vs Grayscale — when and why each matters
+- [x] Thresholding: binary, adaptive, Otsu's method
 - [ ] Morphological operations: erosion, dilation, opening, closing
 - [ ] Histograms and histogram equalization (contrast enhancement)
 

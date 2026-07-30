@@ -1,52 +1,56 @@
-Ran command: `python day2_webcam.py`
-Edited day2_webcam.py
-Viewed day2_webcam.py:1-16
-Ran command: `python day2_webcam.py`
-Edited ai_context.md
+# Month 2: Object Detection with YOLO and Roboflow
 
-Perfectly executed! You sliced exactly 200 rows and 200 columns to get a perfect `200x200` square. By doing this, you've essentially just learned the exact preprocessing pipeline (Grayscale -> Resize -> Crop) that gets fed into neural networks.
+Congratulations! You have officially completed the **Month 1 Foundations**. You now understand how to read video streams, manipulate them as matrices in real-time, and save the output. That is the exact pipeline needed for applied Computer Vision.
 
-I've updated `ai_context.md` with our progress!
+Now we enter the exciting part: **Detection & Tracking.**
 
-### The Final Month 1 Challenge: Saving Video
+In defense systems, you don't just look at pixels—you need the computer to draw a box around a drone and tell you "Drone detected with 95% confidence at coordinates X, Y".
 
-To wrap up the Month 1 fundamentals, we need to know how to save these manipulated frames to disk. In defense systems, you don't just detect drones—you record the incident for playback and auditing.
+To do this, we use **YOLO (You Only Look Once)**. It's the industry standard for real-time object detection because it's incredibly fast.
 
-Your challenge is to modify `day2_webcam.py` to **record your resized 640x640 grayscale feed to a video file**.
+### Phase 1: Understanding the YOLO Pipeline
 
-Here are the 4 steps to do it:
+Before we train our own model on custom drone data, we are going to use a pre-trained YOLO model to detect everyday objects (people, laptops, cell phones, etc.) to understand the workflow.
 
-**1. Create a Codec (Before the loop):**
-In TypeScript/Web, the browser handles video codecs for you (like H.264). In OpenCV, you have to explicitly define it using a "FourCC" code. Add this line:
+For this phase, we need to install the `ultralytics` package, which is the official Python library for modern YOLO models (v8 and v11).
 
-```python
-fourcc = cv2.VideoWriter_fourcc(*'mp4v') # This tells OpenCV to use the MP4 codec
+### Your First Task in Month 2:
+
+**1. Install Ultralytics:**
+Open your terminal (make sure your `cv-env` is active!) and run:
+```bash
+pip install ultralytics
 ```
 
-**2. Initialize the VideoWriter (Before the loop):**
-Create the writer object.
+**2. Create a new file:**
+Create a file called `day3_yolo_intro.py`.
+
+**3. Run Inference on an Image:**
+Write a script that downloads and runs YOLO on a default image. Ultralytics makes this surprisingly easy. Here is the code to get you started:
 
 ```python
-# The syntax: cv2.VideoWriter(filename, codec, fps, (width, height), isColor)
-out = cv2.VideoWriter('drone_feed_record.mp4', fourcc, 20.0, (640, 640), False)
+from ultralytics import YOLO
+import cv2
+
+# Load a pre-trained YOLO11 Nano model (it will auto-download the weights file 'yolo11n.pt')
+model = YOLO('yolo11n.pt')
+
+# Run inference on an image. (You can use any image you have, or pass a URL)
+# The model will download this sample image from the internet if you don't have it locally.
+results = model('https://ultralytics.com/images/zidane.jpg')
+
+# YOLO returns a list of Results objects. We just take the first one.
+result = results[0]
+
+# result.plot() automatically draws the bounding boxes and labels onto the image!
+annotated_frame = result.plot()
+
+# Show it using your OpenCV skills!
+cv2.imshow("YOLO Inference", annotated_frame)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 ```
 
-_⚠️ **Major Gotcha:** Remember how NumPy matrices are `(Height, Width)`? The `VideoWriter` expects `(Width, Height)`. In this case, it's 640x640 so it doesn't matter, but keep this in mind for the future! We also pass `False` at the end because we are writing Grayscale (1-channel), not color._
+Run this script and see what happens! It might take a few seconds the very first time because it has to download the tiny 6MB `yolo11n.pt` model weights file.
 
-**3. Write the Frame (Inside the loop):**
-Right after you create `resized_frame` (the 640x640 gray one), save it to the file by calling:
-
-```python
-out.write(resized_frame)
-```
-
-_(You can delete your cropping logic for this, or just change the VideoWriter dimensions to `200, 200` and write the `cropped_frame` instead!)_
-
-**4. Cleanup (After the loop):**
-Just like `cap.release()`, you must close the file writer so it saves properly:
-
-```python
-out.release()
-```
-
-Give it a shot, run the script for a few seconds, press 'q' to quit, and then check your folder for the new MP4 file! Let me know when you get it working!
+Let me know when you get the image to pop up with boxes drawn around the people!

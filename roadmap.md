@@ -6,8 +6,8 @@
 
 ---
 
-## Week 1: OpenCV & Image Processing Fundamentals *(In Progress)*
-**Status:** Days 1-2 complete
+## Week 1: OpenCV & Image Processing Fundamentals *(Complete)*
+**Status:** Complete
 
 - [x] Environment setup (Python, NumPy, OpenCV, matplotlib)
 - [x] Images as NumPy matrices, BGR color space, drawing primitives
@@ -17,13 +17,13 @@
 - [x] Color spaces: BGR vs HSV vs Grayscale — when and why each matters
 - [x] Thresholding: binary, adaptive, Otsu's method
 - [x] Morphological operations: erosion, dilation, opening, closing
-- [ ] Histograms and histogram equalization (contrast enhancement)
+- [x] Histograms and histogram equalization (contrast enhancement, CLAHE)
 
 **Deliverable:** Script that takes a noisy/low-contrast image and produces a clean binary mask of a target region.
 
 ---
 
-## Week 2: Motion Detection & Classical Object Detection
+## Week 2: Motion Detection & Classical Object Detection *(In Progress)*
 - [ ] Background subtraction (MOG2, KNN) — detecting moving objects in a static scene
 - [ ] Contour detection: `findContours`, contour area filtering, bounding rectangles
 - [ ] Build a basic motion detector: highlight moving objects with bounding boxes

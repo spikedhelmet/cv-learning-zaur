@@ -16,9 +16,11 @@ Create `week1_histograms.py`. Using your phone camera feed:
 1. Capture frames, resize to 640x480 (not square this time — keep the natural aspect ratio).
 2. Convert each frame to grayscale.
 3. Calculate the histogram using `cv2.calcHist()`:
+
    ```python
    hist = cv2.calcHist([gray_frame], [0], None, [256], [0, 256])
    ```
+
    - `[gray_frame]` — the image (must be in a list)
    - `[0]` — channel index (0 for grayscale, or 0/1/2 for B/G/R)
    - `None` — no mask (analyze the entire image)
@@ -28,17 +30,21 @@ Create `week1_histograms.py`. Using your phone camera feed:
 4. **Visualize the histogram on a canvas.**
 
    First, create a blank white canvas:
+
    ```python
    hist_canvas = np.ones((200, 256), dtype=np.uint8) * 255
    ```
+
    - **`np.ones((200, 256), ...)`** — Creates a 2D NumPy array of shape (200 rows, 256 columns) filled entirely with the value `1`. Compare this to `np.zeros()` which fills with `0`. Think of it like `new Array(200 * 256).fill(1)` in JS, but shaped as a 2D grid.
    - **`dtype=np.uint8`** — Specifies the data type of every element in the array. `uint8` = unsigned 8-bit integer, range 0–255, just like pixel values. Using the wrong dtype (e.g., `float32`) would cause OpenCV to error or display incorrectly.
    - **`* 255`** — Multiplies every element in the array by 255. So the canvas starts as all `1`s, and becomes all `255`s — i.e., pure white pixels.
 
    Next, normalize the histogram so its values fit within the 200-pixel height of your canvas:
+
    ```python
    cv2.normalize(hist, hist, 0, 200, cv2.NORM_MINMAX)
    ```
+
    - **`cv2.normalize(src, dst, alpha, beta, norm_type)`**
      - `src` — the input array (your raw histogram, where values could be in the thousands)
      - `dst` — the output array to write into. Passing `hist` again means "overwrite in place" — same as `arr = normalize(arr)`.
@@ -47,17 +53,20 @@ Create `week1_histograms.py`. Using your phone camera feed:
      - `norm_type` — the normalization strategy. `cv2.NORM_MINMAX` finds the current min and max, then linearly scales all values so the smallest maps to `alpha` and the largest maps to `beta`. The TypeScript analogy: `const normalized = val => (val - min) / (max - min) * 200`.
 
    Now draw a vertical line per bin:
+
    ```python
    for i in range(256):
        cv2.line(hist_canvas, (i, 200), (i, 200 - int(hist[i])), 0, 1)
    ```
+
    - `range(256)` — loops `i` from 0 to 255, one iteration per histogram bin (one per intensity level)
    - `(i, 200)` — the bottom of the line (x = bin index, y = bottom of canvas)
-   - `(i, 200 - int(hist[i]))` — the top of the line. Subtracting from 200 flips the bar chart upright, since y=0 is at the *top* in image coordinates
+   - `(i, 200 - int(hist[i]))` — the top of the line. Subtracting from 200 flips the bar chart upright, since y=0 is at the _top_ in image coordinates
    - `0` — the color (black in grayscale)
    - `1` — line thickness of 1 pixel
 
 5. Apply histogram equalization to the grayscale frame:
+
    ```python
    equalized = cv2.equalizeHist(gray_frame)
    ```
@@ -87,4 +96,4 @@ Save it as part of the same `week1_histograms.py` file.
 
 **For interviews:** "How would you handle poor contrast in your detection input?" CLAHE is the standard answer for preprocessing before feeding frames into a model. It's also used heavily in medical imaging (X-rays, CT scans).
 
-**For deeper understanding:** The Wikipedia article on [Histogram Equalization](https://en.wikipedia.org/wiki/Histogram_equalization) has clean visual diagrams showing how the cumulative distribution function (CDF) is used to remap intensities. You don't need to memorize the math, but understanding *why* equalization makes dark images brighter (it stretches compressed intensity ranges) is useful for interviews.
+**For deeper understanding:** The Wikipedia article on [Histogram Equalization](https://en.wikipedia.org/wiki/Histogram_equalization) has clean visual diagrams showing how the cumulative distribution function (CDF) is used to remap intensities. You don't need to memorize the math, but understanding _why_ equalization makes dark images brighter (it stretches compressed intensity ranges) is useful for interviews.

@@ -32,10 +32,10 @@ See `roadmap.md` for the full breakdown. Summary:
 - IP Webcam URL format: `http://<phone-ip>:8080/video`
 
 ## Current Progress
-- **Week 1 nearly complete.** See `roadmap.md` for checked-off items.
-- Files written: `day1_demo.py`, `day2_image.py`, `day2_webcam.py`, `week1_color_spaces.py`, `week1_morphology.py`, `week1_challenge_isolator.py`
-- Completed: color spaces (HSV), thresholding (binary, Otsu, adaptive), morphological operations (erosion, dilation, opening, closing)
+- **Week 1 complete.** See `roadmap.md` for checked-off items.
+- Files written: `day1_demo.py`, `day2_image.py`, `day2_webcam.py`, `week1_color_spaces.py`, `week1_morphology.py`, `week1_challenge_isolator.py`, `week1_histograms.py`
+- Completed: color spaces (HSV), thresholding (binary, Otsu, adaptive), morphological operations (erosion, dilation, opening, closing), histograms (equalization, CLAHE)
 - Completed the Week 1 unguided challenge: built an object isolator using HSV color masking + morphological opening + contour detection + area filtering
-- Currently on: Week 1, Task 5 (Histograms & contrast enhancement) — the final Week 1 topic
+- Currently on: **Week 2 — Motion Detection & Classical Object Detection**
 
 *Note for AI: When this repository is cloned on a new computer, read this file and `roadmap.md` to instantly resume.*

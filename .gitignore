@@ -8,3 +8,9 @@ pyvenv.cfg
 # Python cache
 __pycache__/
 *.pyc
+
+# Env
+cv-env
+venv
+env
+.env

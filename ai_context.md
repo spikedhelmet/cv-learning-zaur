@@ -13,6 +13,7 @@ The user is a frontend developer (experienced in React Native, TypeScript, PHP, 
 - Focus on applied, hands-on engineering. Skip heavy math theory.
 - **Include occasional unguided challenges** — problems where the user must figure out the implementation without step-by-step code. This builds real problem-solving skill. Especially do it at the end of weeks. Occasional quizzes can also help.
 - **Provide supplemental theory references** where useful (interview prep, deeper understanding). Links, book chapters, papers, etc. Don't force it, but don't skip it when it matters.
+- **CRITICAL: Explain every function and type used in tasks.** When introducing any function, method, or constructor, always explain its full signature: what every argument does, what type it expects, and what it returns. Never drop a code snippet without explaining what each piece does. This applies to NumPy, OpenCV, and Python built-ins alike. Use TypeScript/JS analogies where they map cleanly.
 
 ## The 8-Week Roadmap
 See `roadmap.md` for the full breakdown. Summary:

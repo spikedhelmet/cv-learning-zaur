@@ -16,7 +16,7 @@
 - [x] Writing video to disk with `VideoWriter`
 - [x] Color spaces: BGR vs HSV vs Grayscale — when and why each matters
 - [x] Thresholding: binary, adaptive, Otsu's method
-- [ ] Morphological operations: erosion, dilation, opening, closing
+- [x] Morphological operations: erosion, dilation, opening, closing
 - [ ] Histograms and histogram equalization (contrast enhancement)
 
 **Deliverable:** Script that takes a noisy/low-contrast image and produces a clean binary mask of a target region.

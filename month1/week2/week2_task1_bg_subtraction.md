@@ -2,9 +2,9 @@
 
 ## Why This Matters
 
-Everything you built in Week 1 — color masking, thresholding, morphology — works great when you know *what color* your target is. But what if you don't? What if the drone is black, or gray, or changes color depending on the lighting?
+Everything you built in Week 1 — color masking, thresholding, morphology — works great when you know _what color_ your target is. But what if you don't? What if the drone is black, or gray, or changes color depending on the lighting?
 
-In counter-drone systems, you often don't care about color at all. You care about **motion**. A drone moves. The sky doesn't. Background subtraction exploits exactly this: it learns what the "background" looks like over time, and then anything that *doesn't match* gets flagged as "foreground" — a potential target.
+In counter-drone systems, you often don't care about color at all. You care about **motion**. A drone moves. The sky doesn't. Background subtraction exploits exactly this: it learns what the "background" looks like over time, and then anything that _doesn't match_ gets flagged as "foreground" — a potential target.
 
 ## The Concept
 
@@ -13,6 +13,7 @@ Background subtraction algorithms maintain a **model** of the background scene. 
 The two main algorithms in OpenCV:
 
 ### MOG2 (Mixture of Gaussians v2)
+
 Models each pixel's history as a mixture of Gaussian distributions. Adapts to gradual lighting changes (like clouds moving across the sky). This is the most commonly used one.
 
 ```python
@@ -22,12 +23,14 @@ bg_subtractor = cv2.createBackgroundSubtractorMOG2(
     detectShadows=True
 )
 ```
+
 - **`cv2.createBackgroundSubtractorMOG2(...)`** — Creates and returns a background subtractor object. You create it once before the loop, then call `.apply()` on every frame.
   - `history` (int, default 500) — How many recent frames the model remembers. Higher = slower to adapt to scene changes (like a person walking into frame and stopping). Lower = forgets faster, more responsive.
   - `varThreshold` (float, default 16) — How sensitive the detector is. Lower = more sensitive (catches subtle motion, but also more noise). Higher = only flags large differences.
   - `detectShadows` (bool, default True) — If `True`, the algorithm also detects shadows and marks them as gray (127) instead of white (255) in the output mask. Useful because shadows move with objects but aren't objects themselves.
 
 ### KNN (K-Nearest Neighbors)
+
 A newer algorithm. Generally handles scenes with more dynamic backgrounds (like waving trees or water) better than MOG2.
 
 ```python
@@ -37,6 +40,7 @@ bg_subtractor = cv2.createBackgroundSubtractorKNN(
     detectShadows=True
 )
 ```
+
 - **`cv2.createBackgroundSubtractorKNN(...)`** — Same interface as MOG2, different algorithm under the hood.
   - `history` — Same as MOG2.
   - `dist2Threshold` (float, default 400.0) — The distance threshold for classifying foreground vs background. Similar concept to `varThreshold` in MOG2 but uses a different metric.
@@ -49,6 +53,7 @@ Inside your frame loop, you call `.apply()` on every frame:
 ```python
 fg_mask = bg_subtractor.apply(frame)
 ```
+
 - **`.apply(frame)`** — Takes the current frame, compares it against the learned background model, updates the model, and returns a single-channel binary mask.
   - Returns a `numpy.ndarray` of shape `(Height, Width)` with dtype `uint8`.
   - Pixel values: `255` = definite foreground, `127` = shadow (if `detectShadows=True`), `0` = background.
@@ -65,6 +70,7 @@ Create `week2_bg_subtraction.py`:
 5. Display the stacked result.
 
 **What to observe:**
+
 - When you first start the script, the entire frame will be white (foreground) for a few seconds. That's the algorithm learning the background — it hasn't seen enough frames yet.
 - Once it stabilizes, sit still for ~5 seconds. The background model will learn your position. Now **wave your hand** — you should see just your hand light up as white foreground.
 - Now **stand up and move away from the camera**. Your previous sitting position might briefly appear as a "ghost" in the MOG2 mask. That's the old background model adjusting to your absence.

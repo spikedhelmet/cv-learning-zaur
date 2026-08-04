@@ -6,7 +6,8 @@
 
 ---
 
-## Week 1: OpenCV & Image Processing Fundamentals *(Complete)*
+## Week 1: OpenCV & Image Processing Fundamentals _(Complete)_
+
 **Status:** Complete
 
 - [x] Environment setup (Python, NumPy, OpenCV, matplotlib)
@@ -23,11 +24,12 @@
 
 ---
 
-## Week 2: Motion Detection & Classical Object Detection *(In Progress)*
+## Week 2: Motion Detection & Classical Object Detection _(In Progress)_
+
 - [x] Background subtraction (MOG2, KNN) — detecting moving objects in a static scene
 - [x] Contour detection: `findContours`, contour area filtering, bounding rectangles
 - [x] Build a basic motion detector: highlight moving objects with bounding boxes
-- [ ] Edge detection (Canny) and when it's useful
+- [x] Edge detection (Canny) and when it's useful
 - [ ] Optical flow basics (sparse with Lucas-Kanade) — tracking point motion between frames
 - [ ] ROI (Region of Interest) selection and masking
 
@@ -36,6 +38,7 @@
 ---
 
 ## Week 3: Introduction to Deep Learning for CV
+
 - [ ] What neural networks actually do (conceptual, no math rabbit holes)
 - [ ] Classification vs Detection vs Segmentation — the three tasks
 - [ ] What a "model" is: weights file, architecture, inference
@@ -49,6 +52,7 @@
 ---
 
 ## Week 4: Datasets, Annotation & Roboflow
+
 - [ ] What makes a good detection dataset (diversity, balance, edge cases)
 - [ ] Roboflow account setup, explore existing drone/UAV datasets
 - [ ] Annotation formats: YOLO txt, COCO JSON, Pascal VOC XML
@@ -62,6 +66,7 @@
 ---
 
 ## Week 5: Training Custom YOLO Models
+
 - [ ] Fine-tuning vs training from scratch — transfer learning explained
 - [ ] Train YOLOv8/11 on your drone dataset (local or Google Colab if GPU needed)
 - [ ] Understanding training output: loss curves, mAP, precision, recall
@@ -75,6 +80,7 @@
 ---
 
 ## Week 6: Multi-Object Tracking
+
 - [ ] Detection vs Tracking: why detection alone isn't enough
 - [ ] Tracking algorithms overview: SORT, DeepSORT, ByteTrack, BoT-SORT
 - [ ] Implement ByteTrack with your custom YOLO model
@@ -88,6 +94,7 @@
 ---
 
 ## Week 7: Defense C2 Dashboard — Backend
+
 - [ ] System architecture: CV pipeline → API → Frontend
 - [ ] FastAPI backend serving detection results (JSON over WebSocket or REST)
 - [ ] Stream processed video frames to the frontend (MJPEG stream or WebSocket)
@@ -100,6 +107,7 @@
 ---
 
 ## Week 8: Defense C2 Dashboard — Frontend & Portfolio Polish
+
 - [ ] React/Next.js frontend displaying the live detection feed
 - [ ] Real-time detection event log (WebSocket updates)
 - [ ] Dashboard UI: detection count, active tracks, alert history, zone map
@@ -113,7 +121,9 @@
 ---
 
 ## Key Concepts to Know for Interviews
+
 These will be woven into the weekly tasks, not studied in isolation:
+
 - **mAP (Mean Average Precision):** How detection accuracy is measured
 - **Loss:** What the model optimizes during training
 - **Overfitting:** When the model memorizes training data instead of learning patterns

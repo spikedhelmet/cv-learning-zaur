@@ -110,4 +110,31 @@ Before writing code, answer these in your head:
 1. Why can't optical flow track points on a smooth, plain white wall?
 2. What does `st == 1` indicate in `cv2.calcOpticalFlowPyrLK`?
 
-Give `week2_optical_flow.py` a try!
+---
+
+## 🧩 Challenge (No Guidance)
+
+**Direction Indicator (Velocity Vector)**
+
+Modify your optical flow script (or save as `week2_challenge_optical_flow_direction.py`) to:
+1. Calculate the average displacement vectors `dx = curr_x - prev_x` and `dy = curr_y - prev_y` across all active points in each frame.
+2. Compute the overall magnitude `magnitude = np.sqrt(mean_dx**2 + mean_dy**2)`.
+3. If `magnitude > 3.0` (ignore small static camera jitter):
+   - Display a text overlay on screen indicating the primary direction of motion: `"Moving RIGHT"`, `"Moving LEFT"`, `"Moving UP"`, or `"Moving DOWN"`.
+   - Optionally, draw a large arrow on screen showing the overall movement vector.
+
+---
+
+## 📚 Supplemental Reading
+
+**For interviews:**
+- **3 Core Assumptions of Lucas-Kanade:**
+  1. *Brightness Constancy:* The pixel intensity of an object point does not change drastically from frame $t$ to frame $t+1$.
+  2. *Small Motion:* Points don't teleport long distances between consecutive frames (which is why **Image Pyramids** are used to downsample images and handle larger movements).
+  3. *Spatial Coherence:* Neighboring pixels move together in similar directions.
+- **KLT (Kanade-Lucas-Tomasi) Tracking:** This optical flow pipeline is often referred to in interviews as a KLT tracker.
+
+**For production context:**
+- **High-FPS Target Tracking:** While deep learning models (YOLO) might run at 30–60 FPS, KLT optical flow can run at 200+ FPS on embedded hardware (like NVIDIA Jetson or drone flight controllers) to bridge detection gaps between YOLO frames.
+- **Visual Odometry & SLAM:** Optical Flow is a core component of Visual Odometry, allowing autonomous drones to estimate their own speed and direction when GPS is jammed or unavailable.
+

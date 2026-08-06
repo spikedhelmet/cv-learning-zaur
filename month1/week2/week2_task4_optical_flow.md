@@ -6,7 +6,7 @@
 
 **Objective:** Build a real-time feature tracking script using Lucas-Kanade Optical Flow.
 
-**What Optical Flow is:** So far, Background Subtraction told you *"something moved in this region."* Optical Flow tells you *"this specific point moved 12 pixels right and 5 pixels up."* It calculates a velocity vector `(dx, dy)` for tracked points between consecutive frames.
+**What Optical Flow is:** So far, Background Subtraction told you _"something moved in this region."_ Optical Flow tells you _"this specific point moved 12 pixels right and 5 pixels up."_ It calculates a velocity vector `(dx, dy)` for tracked points between consecutive frames.
 
 **Defense Context:** In counter-drone C2 systems, Background Subtraction detects a target entering the frame. Optical Flow estimates the target's trajectory and speed vector, allowing the system to predict where the target will be 1 second from now.
 
@@ -27,7 +27,7 @@ We focus on Sparse because it's the real-time tracking foundation.
 
 ### Step 1 API: Finding points to track
 
-Before you can track motion, you need to pick *which* points to follow. Flat surfaces and smooth gradients are impossible to track (there's nothing distinctive). You need corners and high-contrast edges.
+Before you can track motion, you need to pick _which_ points to follow. Flat surfaces and smooth gradients are impossible to track (there's nothing distinctive). You need corners and high-contrast edges.
 
 ```python
 feature_params = dict(
@@ -69,11 +69,11 @@ p1, st, err = cv2.calcOpticalFlowPyrLK(prev_gray, curr_gray, p0, None, **lk_para
 
 **Return values:**
 
-| Variable | Type | Shape | Meaning |
-|----------|------|-------|---------|
-| `p1` | ndarray | `(N, 1, 2)` | New `[x, y]` positions of each tracked point in `curr_gray` |
-| `st` | ndarray | `(N, 1)` | Status: `1` = point was successfully tracked, `0` = point was lost (went off-screen, occluded, etc.) |
-| `err` | ndarray | `(N, 1)` | Per-point error measure. Higher = less confident in the match. Often ignored in basic implementations. |
+| Variable | Type    | Shape       | Meaning                                                                                                |
+| -------- | ------- | ----------- | ------------------------------------------------------------------------------------------------------ |
+| `p1`     | ndarray | `(N, 1, 2)` | New `[x, y]` positions of each tracked point in `curr_gray`                                            |
+| `st`     | ndarray | `(N, 1)`    | Status: `1` = point was successfully tracked, `0` = point was lost (went off-screen, occluded, etc.)   |
+| `err`    | ndarray | `(N, 1)`    | Per-point error measure. Higher = less confident in the match. Often ignored in basic implementations. |
 
 ### Drawing API: Lines and circles for motion trails
 
@@ -113,6 +113,7 @@ Create `month1/week2/week2_optical_flow.py`.
 Open your camera stream. Read the very first frame before entering the loop — this becomes your "previous frame" reference. Convert it to grayscale and run `goodFeaturesToTrack` on it to get the initial set of points (`p0`).
 
 Also create a blank canvas for drawing trails:
+
 ```python
 mask = np.zeros_like(first_frame)
 ```
@@ -140,11 +141,12 @@ Note: `st == 1` produces a boolean array. Using it as an index is NumPy boolean 
 
 - Extract `(x, y)` coordinates. These come as floats from OpenCV, but drawing functions need ints. Convert with `int()`.
 - Draw a line on `mask` from the old position to the new position. This creates the motion trail.
-- Draw a small filled circle on the current `frame` at the new position. This shows where the point is *right now*.
+- Draw a small filled circle on the current `frame` at the new position. This shows where the point is _right now_.
 
 Why draw trails on `mask` and dots on `frame`? Because `frame` gets overwritten every iteration (it's the live camera feed), but `mask` persists — so trails accumulate over time. Then you combine them.
 
 **e) Combine and display:**
+
 ```python
 output = cv2.add(frame, mask)
 cv2.imshow("Optical Flow", output)
@@ -166,9 +168,13 @@ Why `reshape(-1, 1, 2)`? `calcOpticalFlowPyrLK` expects input points in shape `(
 ## Checkpoint Questions
 
 1. Why can't optical flow track points on a smooth, plain white wall?
+   Because there wouldn't be any corners?
 2. What does `st == 1` indicate in the output of `calcOpticalFlowPyrLK`?
+   succesful corner detection
 3. Why do we draw trails on a separate `mask` image instead of directly on `frame`?
+   because frame gets rerendered at each iteration thus clearing the trails
 4. What would happen if you never re-detected corners inside the loop?
+   Points get lost? Tbh, I don't fully understand this part. Am I even doing it right?
 
 ---
 
@@ -188,12 +194,14 @@ Modify your optical flow script (or save as `week2_challenge_direction.py`) to:
 ## Supplemental Reading
 
 **For interviews:**
+
 - **The 3 Core Assumptions of Lucas-Kanade** (these come up in interviews verbatim):
-  1. *Brightness Constancy:* Pixel intensity of a tracked point doesn't change drastically between frames.
-  2. *Small Motion:* Points don't teleport long distances between consecutive frames. Image pyramids handle larger displacements by downsampling first.
-  3. *Spatial Coherence:* Neighboring pixels move together in similar directions.
+  1. _Brightness Constancy:_ Pixel intensity of a tracked point doesn't change drastically between frames.
+  2. _Small Motion:_ Points don't teleport long distances between consecutive frames. Image pyramids handle larger displacements by downsampling first.
+  3. _Spatial Coherence:_ Neighboring pixels move together in similar directions.
 - The full pipeline (goodFeaturesToTrack + calcOpticalFlowPyrLK) is often called a **KLT (Kanade-Lucas-Tomasi) tracker** in literature and interviews.
 
 **For production context:**
+
 - **Bridging detection gaps:** Deep learning detectors like YOLO run at 30-60 FPS. KLT optical flow can run at 200+ FPS on embedded hardware (NVIDIA Jetson, drone flight controllers) to interpolate target positions between YOLO inference frames.
 - **Visual Odometry & SLAM:** Optical flow is a core component of Visual Odometry — allowing autonomous drones to estimate their own speed and heading when GPS is jammed or unavailable.

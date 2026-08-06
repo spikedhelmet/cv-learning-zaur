@@ -8,11 +8,13 @@
 ## Task Document Structure Requirements
 When generating any new task Markdown file (e.g. `weekX_taskY_feature.md`), ALWAYS include ALL of the following sections without exception:
 
-1. **🎯 Goal & 💡 Concept:** High-level objective, technical explanation, Defense/C2 context, and Web/TypeScript analogies.
-2. **⚙️ Technical Mechanics & API Overview:** Highlighting parameters and function behaviors (e.g., OpenCV calls).
-3. **🛠️ Step-by-Step Task:** Explicit instructions for building the new script.
-4. **❓ Checkpoint Questions:** Conceptual questions to verify understanding.
-5. **🧩 Challenge (No Guidance):** An unguided programming challenge related to the task that forces independent problem-solving (e.g. creating a separate script or expanding the pipeline).
-6. **📚 Supplemental Reading:** 
+1. **Goal & Concept:** High-level objective, technical explanation, Defense/C2 context, and Web/TypeScript analogies.
+2. **Technical Mechanics & API Overview:** Highlighting parameters and function behaviors (e.g., OpenCV calls). Explain every argument, return type, and non-obvious behavior.
+3. **Step-by-Step Task:** Explicit instructions for building the new script. Every step must explain *why* it's done, not just *what* to do. New functions, patterns, or idioms introduced in the steps must be explained inline — never drop code without context.
+4. **Checkpoint Questions:** Conceptual questions to verify understanding.
+5. **Challenge (No Guidance):** An unguided programming challenge related to the task that forces independent problem-solving (e.g. creating a separate script or expanding the pipeline).
+6. **Supplemental Reading:** 
    - *For Interviews:* Key theoretical questions, core assumptions, algorithms under the hood (e.g. Sobel, Lucas-Kanade assumptions).
    - *For Production Context:* Real-world usage in defense, edge devices, high-FPS pipelines, or visual SLAM/odometry.
+
+**Formatting rules:** No emoji prefixes on section headers. Keep the structure clean and technical.

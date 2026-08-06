@@ -26,16 +26,18 @@ while True:
     if not success:
         continue
     
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    p1, st, err = cv2.calcOpticalFlowPyrLK(prev_gray, gray, p0, None, **lk_params)
+    # frame = cv2.resize(frame, (640, 480))
+    current_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    p1, st, err = cv2.calcOpticalFlowPyrLK(prev_gray, current_gray, p0, None, **lk_params)
     
     # st.ravel() converts shape (N, 1) -> (N,)
     # st.ravel() == 1 creates an array like: [True, True, False, True...]
-    valid_mask = st.ravel() == 1
+    # valid_mask = st.ravel() == 1
 
-    good_old = p0[valid_mask]
-    good_new = p1[valid_mask]
-    print(good_old)
+    if p0 is not None:
+        good_old = p0[st == 1]
+    if p1 is not None:
+        good_new = p1[st == 1]
 
     for new_point, old_point in zip(good_new, good_old):
         # Extract (x, y) coordinates as integers (OpenCV requires int for pixels)
@@ -46,9 +48,17 @@ while True:
         cv2.line(mask, (prev_x, prev_y), (curr_x, curr_y), (0, 255, 0), 2)
         cv2.circle(frame, (curr_x, curr_y), 5, (0, 0, 255), -1)
 
+    output = cv2.add(frame,mask) # combines the mask with the frame
 
+    cv2.imshow("Optical Flow!", output)
 
+    # 
+    prev_gray = current_gray.copy()
+    p0 = good_new.reshape(-1, 1, 2)
 
+    if len(p0) < 10:
+       p0 = cv2.goodFeaturesToTrack(current_gray, mask=None, **feature_params)
+        
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

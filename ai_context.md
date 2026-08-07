@@ -13,6 +13,7 @@ The user is a frontend developer (experienced in React Native, TypeScript, PHP, 
 - Focus on applied, hands-on engineering. Skip heavy math theory.
 - **Include occasional unguided challenges** — problems where the user must figure out the implementation without step-by-step code. This builds real problem-solving skill. Especially do it at the end of weeks. Occasional quizzes can also help.
 - **Provide supplemental theory references** where useful (interview prep, deeper understanding). Links, book chapters, papers, etc. Don't force it, but don't skip it when it matters.
+- **Supplemental reading must include context:** For every external resource (video, article, book chapter), add a one-line note stating: (1) what prerequisite knowledge is needed, (2) what specific takeaway the learner should get from it, and (3) whether it's relevant now or better saved for a later week. Don't recommend resources that require knowledge the learner hasn't built yet.
 - **CRITICAL: Explain every function and type used in tasks.** When introducing any function, method, or constructor, always explain its full signature: what every argument does, what type it expects, and what it returns. Never drop a code snippet without explaining what each piece does. This applies to NumPy, OpenCV, and Python built-ins alike. Use TypeScript/JS analogies where they map cleanly.
 
 ## The 8-Week Roadmap
@@ -36,6 +37,8 @@ See `roadmap.md` for the full breakdown. Summary:
 - Files written: `day1_demo.py`, `day2_image.py`, `day2_webcam.py`, `week1_color_spaces.py`, `week1_morphology.py`, `week1_challenge_isolator.py`, `week1_histograms.py`
 - Completed: color spaces (HSV), thresholding (binary, Otsu, adaptive), morphological operations (erosion, dilation, opening, closing), histograms (equalization, CLAHE)
 - Completed the Week 1 unguided challenge: built an object isolator using HSV color masking + morphological opening + contour detection + area filtering
-- Currently on: **Week 2 — Motion Detection & Classical Object Detection**
+- **Week 2 near-complete.** Background subtraction, contour detection, motion detector, Canny edges, optical flow (Lucas-Kanade), ROI selection & masking all done.
+- Completed Week 2 challenges: optical flow direction indicator, ROI motion detection zone
+- Currently finishing: **Week 2 — wrapping up, ready to move to Week 3**
 
 *Note for AI: When this repository is cloned on a new computer, read this file and `roadmap.md` to instantly resume.*

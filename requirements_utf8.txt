@@ -54,6 +54,7 @@ pytesseract==0.3.13
 python-dateutil==2.9.0.post0
 python-docx==1.2.0
 python-dotenv==1.2.2
+pywin32==311
 PyYAML==6.0.3
 requests==2.33.1
 schemdraw==0.23

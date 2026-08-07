@@ -122,8 +122,11 @@ Create a new file `month1/week2/week2_roi.py` and implement the following:
 ## Checkpoint Questions
 Answer these before writing code:
 1. Why is NumPy ROI slicing `frame[y:y+h, x:x+w]` using `[y, x]` order instead of `[x, y]`?
+because opencv frames come with y,x instead of usual x,y
 2. What happens if you modify a NumPy slice *without* `.copy()`? Does it affect the original array?
+yes, it mutates the original
 3. When would you use a mask-based ROI instead of a simple rectangle?
+for non-rectangular shapes.
 
 ---
 

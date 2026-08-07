@@ -24,14 +24,14 @@
 
 ---
 
-## Week 2: Motion Detection & Classical Object Detection _(In Progress)_
+## Week 2: Motion Detection & Classical Object Detection _(Complete)_
 
 - [x] Background subtraction (MOG2, KNN) — detecting moving objects in a static scene
 - [x] Contour detection: `findContours`, contour area filtering, bounding rectangles
 - [x] Build a basic motion detector: highlight moving objects with bounding boxes
 - [x] Edge detection (Canny) and when it's useful
-- [ ] Optical flow basics (sparse with Lucas-Kanade) — tracking point motion between frames
-- [ ] ROI (Region of Interest) selection and masking
+- [x] Optical flow basics (sparse with Lucas-Kanade) — tracking point motion between frames
+- [x] ROI (Region of Interest) selection and masking
 
 **Deliverable:** A live motion detection script that draws bounding boxes around moving objects in your phone's camera feed.
 

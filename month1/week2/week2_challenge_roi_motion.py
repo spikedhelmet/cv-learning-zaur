@@ -54,17 +54,22 @@ while True:
 
     # frame[y:y+h, x:x+w] = fg_bgr
 
-    cv2.rectangle(frame, (x, y), (x+w, y+h), (0,255,0),2)
+    
     contours, _ = cv2.findContours(merged_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    motion_detected = False
 
     for contour in contours:
         # if cv2.contourArea(contour) < 1000:
         # if w * h < 500:
         if cv2.arcLength(contour, closed=False) < 100:
+            motion_detected = False
             continue
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0,0,255),2)
+        motion_detected = True
+        # cv2.rectangle(frame, (x, y), (x+w, y+h), (0,0,255),2)
         __draw_label(roi, "ALERT: Motion in Zone!", (20,20), (255,255,255))
 
+    box_color = (0, 0, 255) if motion_detected else (0, 255, 0)
+    cv2.rectangle(frame, (x, y), (x+w, y+h), box_color,2)
 
     # combined = cv2.add(frame, mask)
     cv2.imshow("ROI", frame)

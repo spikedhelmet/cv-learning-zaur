@@ -8,7 +8,7 @@
 
 ## Task Document Structure Requirements
 
-When generating any new task Markdown file (e.g. `weekX_taskY_feature.md`), ALWAYS include ALL of the following sections without exception:
+When generating any new task Markdown file (e.g. `taskX_feature.md`), ALWAYS include ALL of the following sections without exception:
 
 1. **Goal & Concept:** High-level objective, technical explanation, Defense/C2 context, and Web/TypeScript analogies.
 2. **Technical Mechanics & API Overview:** Highlighting parameters and function behaviors (e.g., OpenCV calls). Explain every argument, return type, and non-obvious behavior.

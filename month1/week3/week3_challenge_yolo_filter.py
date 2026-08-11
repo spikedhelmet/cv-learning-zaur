@@ -9,8 +9,6 @@ results = model.predict(source, batch=8)
 #     print(f"--- Image {i} Results ---")
 
 for result in results:
-
-
     img = result.orig_img
     classes = result.boxes.cls
     boxes_xyxy = result.boxes.xyxy

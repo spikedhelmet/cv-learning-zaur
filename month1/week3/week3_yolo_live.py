@@ -35,7 +35,6 @@ while True:
             cv2.putText(frame, class_name, (int(x),int(y) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 2)
             cv2.putText(frame, str(conf), (int(x),int(y) - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
 
-
     cv2.imshow("live", frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):

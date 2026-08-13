@@ -37,15 +37,15 @@
 
 ---
 
-## Week 3: Introduction to Deep Learning for CV
+## Week 3: Introduction to Deep Learning for CV _(Complete)_
 
-- [ ] What neural networks actually do (conceptual, no math rabbit holes)
-- [ ] Classification vs Detection vs Segmentation — the three tasks
-- [ ] What a "model" is: weights file, architecture, inference
-- [ ] Install `ultralytics`, run pre-trained YOLOv8/11 on sample images
-- [ ] Understand YOLO output: bounding boxes, class IDs, confidence scores
-- [ ] Run YOLO on your live phone camera feed
-- [ ] FPS measurement and basic performance awareness
+- [x] What neural networks actually do (conceptual, no math rabbit holes)
+- [x] Classification vs Detection vs Segmentation — the three tasks
+- [x] What a "model" is: weights file, architecture, inference
+- [x] Install `ultralytics`, run pre-trained YOLOv8/11 on sample images
+- [x] Understand YOLO output: bounding boxes, class IDs, confidence scores
+- [x] Run YOLO on your live phone camera feed
+- [x] FPS measurement and basic performance awareness
 
 **Deliverable:** Live YOLO detection on your phone camera feed with FPS counter overlay.
 

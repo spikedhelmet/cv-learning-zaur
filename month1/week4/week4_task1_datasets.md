@@ -213,17 +213,17 @@ This week is less about writing Python scripts and more about understanding data
 
 ### 1. Create the directory structure
 
-Inside your project, create the following empty directory tree. You can do this from the terminal:
+Inside your project, create the following empty directory tree. Since you are using Windows PowerShell, you can run this command to create all the folders at once:
 
-```bash
-mkdir -p month2/week4/drone_dataset/{images/{train,val,test},labels/{train,val,test}}
+```powershell
+"train","val","test" | ForEach-Object { New-Item -ItemType Directory -Force -Path "month1\week4\drone_dataset\images\$_"; New-Item -ItemType Directory -Force -Path "month1\week4\drone_dataset\labels\$_" }
 ```
 
 This gives you the exact skeleton YOLO expects.
 
 ### 2. Write a `data.yaml` file
 
-Create `month2/week4/drone_dataset/data.yaml` by hand. Define:
+Create `month1/week4/drone_dataset/data.yaml` by hand. Define:
 - `path`: the absolute path to your `drone_dataset/` directory
 - `train`, `val`, `test`: the relative paths to image subdirectories
 - `nc`: 1 (we'll start with just "drone")

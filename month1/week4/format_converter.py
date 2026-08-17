@@ -7,7 +7,7 @@ img_h, img_w = img.shape[:2]
 with open("month1/week4/drone_dataset/labels/train/cat.txt", "r") as f:
     line = f.read().strip()
 
-print(line)
+# print(line)
     
 # Split the string by spaces to get the individual numbers
 parts = line.split(" ")
@@ -27,11 +27,18 @@ ymin = int(center_y_px - (box_height_px / 2))
 xmax = int(center_x_px + (box_width_px / 2))
 ymax = int(center_y_px + (box_height_px / 2))
 
+coco = {"category_id": 0, "bbox": [xmin, ymin, box_width_px, box_height_px]}
+pascal_voc = {"name": "drone", "xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax}
+print("coco", coco)
+print("pascal_voc", pascal_voc)
+xcenter = (xmin + xmax) / 2 / img_w
+ycenter = (ymin + ymax) / 2 / img_h
+box_width = (xmax - xmin) / img_w
+box_height = (ymax - ymin) / img_h
+coco_to_yolo = { 0,  xcenter, ycenter, box_width, box_height}
+print("coco to yolo", coco_to_yolo)
+# cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+# cv2.imshow("image", img)
 
-# cv2.rectangle(image, top_left_pt, bottom_right_pt, color_bgr, thickness)
-    #    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
-cv2.imshow("image", img)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()

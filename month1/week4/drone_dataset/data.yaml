@@ -1,4 +1,4 @@
-path: /month1/week4/drone_dataset
+path: /Users/ruslan/Desktop/Projects/other/cv-learning-zaur/month1/week4/drone_dataset
 train: images/train
 val: images/val
 test: images/test

@@ -14,3 +14,6 @@ cv-env
 venv
 env
 .env
+
+# Images
+month1/week4/drone_dataset

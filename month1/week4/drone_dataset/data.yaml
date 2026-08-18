@@ -1,6 +1,15 @@
 path: /Users/ruslan/Desktop/Projects/other/cv-learning-zaur/month1/week4/drone_dataset
-train: images/train
-val: images/val
-test: images/test
-nc: 1
-names: ["drone"]
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 4
+names: ["drone", "0", "1", "not drone"]
+# names: ["0", "1"]
+
+roboflow:
+  workspace: dronenotdrone
+  project: drone-detection-pq8sj
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/dronenotdrone/drone-detection-pq8sj/dataset/2

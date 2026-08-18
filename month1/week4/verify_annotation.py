@@ -1,10 +1,10 @@
 import cv2
-img = cv2.imread('month1/week4/drone_dataset/images/train/cat.jpg')
+img = cv2.imread('month1/week4/drone_dataset/train/images/0008_jpg.rf.ed07cab8d3fa5695da33ef0203326a19.jpg')
 # img = cv2.imread('./drone_dataset/images/cat.jpg')
 
 img_h, img_w = img.shape[:2]
 
-with open("month1/week4/drone_dataset/labels/train/cat.txt", "r") as f:
+with open("month1/week4/drone_dataset/train/labels/0008_jpg.rf.ed07cab8d3fa5695da33ef0203326a19.txt", "r") as f:
     line = f.read().strip()
 
 print(line)

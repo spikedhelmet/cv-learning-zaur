@@ -14,23 +14,22 @@ Training a model requires thousands of images. Collecting and annotating that ma
 
 ### Common Augmentations
 
-| Augmentation | What it does | Why it helps |
-|---|---|---|
-| **Horizontal Flip** | Mirrors the image left-to-right | A drone flying left looks different from one flying right. Flipping doubles your data for free. |
-| **Rotation (±15°)** | Slightly tilts the image | Camera angles vary in the field. The model needs to handle slight rotations. |
-| **Brightness/Contrast** | Randomly adjusts lighting | Drones appear in dawn, noon, dusk, overcast. The model must handle all conditions. |
-| **Noise** | Adds random pixel noise | Simulates low-quality cameras, sensor noise, or compression artifacts. |
-| **Crop** | Randomly crops a portion of the image | Forces the model to detect partially visible objects (drone half-off-screen). |
-| **Mosaic** | Combines 4 images into one | A YOLO-specific augmentation. Forces the model to detect multiple objects at different scales in one image. |
+| Augmentation            | What it does                          | Why it helps                                                                                                |
+| ----------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Horizontal Flip**     | Mirrors the image left-to-right       | A drone flying left looks different from one flying right. Flipping doubles your data for free.             |
+| **Rotation (±15°)**     | Slightly tilts the image              | Camera angles vary in the field. The model needs to handle slight rotations.                                |
+| **Brightness/Contrast** | Randomly adjusts lighting             | Drones appear in dawn, noon, dusk, overcast. The model must handle all conditions.                          |
+| **Noise**               | Adds random pixel noise               | Simulates low-quality cameras, sensor noise, or compression artifacts.                                      |
+| **Crop**                | Randomly crops a portion of the image | Forces the model to detect partially visible objects (drone half-off-screen).                               |
+| **Mosaic**              | Combines 4 images into one            | A YOLO-specific augmentation. Forces the model to detect multiple objects at different scales in one image. |
 
 ### Critical Rule: Augment ONLY the Training Set
+
 Never augment your `val` or `test` sets. Those must remain pristine, unmodified images that represent real-world conditions. Augmenting evaluation data would inflate your metrics artificially.
 
 ### Defense Context
-In counter-drone systems, you encounter drones at different altitudes (tiny vs. large in frame), different times of day (lighting), different weather (rain, fog, glare), and different backgrounds (sky, trees, buildings). Augmentation simulates these variations without needing to physically fly a drone in every possible condition.
 
-### Web / TS Analogy
-Think of augmentation like generating test fixtures in software. Instead of writing 1000 manual test cases, you write a few base cases and use a fuzzer or property-based testing library (like fast-check) to generate thousands of variations automatically. Same principle — expand coverage from a small base.
+In counter-drone systems, you encounter drones at different altitudes (tiny vs. large in frame), different times of day (lighting), different weather (rain, fog, glare), and different backgrounds (sky, trees, buildings). Augmentation simulates these variations without needing to physically fly a drone in every possible condition.
 
 ---
 
@@ -39,6 +38,7 @@ Think of augmentation like generating test fixtures in software. Instead of writ
 ### What is Roboflow?
 
 Roboflow is a platform for managing CV datasets. It handles:
+
 1. **Uploading** images and annotations
 2. **Annotating** (labeling) images with bounding boxes in a web UI
 3. **Augmenting** your dataset with configurable transformations
@@ -84,6 +84,7 @@ For now, we'll use Roboflow's built-in augmentation. You'll encounter code-based
 ### 3. Explore the Dataset
 
 Before downloading, explore the dataset on Roboflow:
+
 - **Browse images:** Click through 20-30 images. Are the bounding boxes tight and accurate? Are there unlabeled objects?
 - **Check class distribution:** How many images per class? Is it balanced?
 - **Check image quality:** Are images diverse (different backgrounds, lighting, drone sizes)?
@@ -116,6 +117,7 @@ month1/week4/drone_dataset/
 ### 6. Update `data.yaml`
 
 Edit your `data.yaml` to reflect the actual dataset:
+
 - Update `path` to the absolute path of your `drone_dataset/` directory.
 - Update `nc` (number of classes) to match the dataset.
 - Update `names` to list all class names from the dataset.
@@ -127,9 +129,18 @@ Adapt your `verify_annotation.py` script to load a random image from the downloa
 ---
 
 ## Checkpoint Questions
+
 1. Why would you apply horizontal flip augmentation but NOT vertical flip for a drone detection dataset? (Hint: think about what a vertically flipped drone image looks like.)
+
+- I am guessing a plane type drone would like almost identical upside down. A propeller drone would like different but it's unlikely to be flying upside down in a real scenario.
+
 2. If your dataset has 1000 drone images and 50 bird images, what problem does this create during training? How would augmentation help?
+
+- I don't remember how it is called exactly but basically it's likely to detect birds as drones due to the lack of data. Augmentation would increase the number of bird images I guess? Though the ratio would stay the same, no?
+
 3. What is the difference between applying augmentations in Roboflow (offline) vs. during training (online)?
+
+- Roboflow augs are limited. can do much more with online training.
 
 ---
 
@@ -138,6 +149,7 @@ Adapt your `verify_annotation.py` script to load a random image from the downloa
 **Dataset Statistics Script**
 
 Create `week4_challenge_dataset_stats.py`:
+
 1. Point it at your `drone_dataset/` directory.
 2. Scan all label files in `train/`, `val/`, and `test/`.
 3. Print a summary report:
@@ -151,21 +163,72 @@ Create `week4_challenge_dataset_stats.py`:
    - Annotations with coordinates outside the valid range (< 0 or > 1).
    - Extreme aspect ratio boxes (width/height ratio > 10 or < 0.1).
 
-This is a real production task — every ML team runs dataset statistics before training to catch problems early.
+This is a real production task — every ML team runs dataset statistics before training to catch problem early.
 
 ---
 
 ## Supplemental Reading
 
 **For interviews:**
+
 - **"How do you handle class imbalance?"** — Common interview question. Answers include: oversampling the minority class, undersampling the majority class, augmenting only the minority class, using class-weighted loss functions, or using focal loss (which down-weights easy examples and focuses on hard ones).
 - **"What augmentations would you choose for aerial/drone imagery?"** — Rotation, scale variation, brightness/contrast (day/night), and mosaic are the most impactful. Avoid augmentations that create unrealistic images (e.g., extreme color shifts that make the sky purple).
 
 **For production context:**
+
 - **Dataset versioning:** In production, you version your datasets like code. Roboflow does this automatically. If Model v2 performs worse than Model v1, you need to know exactly which dataset each was trained on to debug the regression.
 - **Active learning:** A production workflow where the model identifies images it's uncertain about, sends them to human annotators for labeling, and retrains. This creates a feedback loop that continuously improves the dataset with the hardest examples.
 
 **External resources:**
+
 - Roboflow Universe (browse datasets): https://universe.roboflow.com
-- Roboflow blog — *"How to Train YOLOv8"*: https://blog.roboflow.com/how-to-train-yolov8-on-a-custom-dataset/ — End-to-end tutorial using Roboflow + Ultralytics. A preview of what you'll do in Week 5.
+- Roboflow blog — _"How to Train YOLOv8"_: https://blog.roboflow.com/how-to-train-yolov8-on-a-custom-dataset/ — End-to-end tutorial using Roboflow + Ultralytics. A preview of what you'll do in Week 5.
 - Albumentations library docs: https://albumentations.ai/docs/ — The go-to Python library for code-based augmentation. You'll use this eventually.
+
+# Challenge Help
+
+You are 100% right, I apologize. Let's back up and break down _how_ to think about extracting this data, step by step.
+
+Right now, your code uses `os.scandir` to count how many _files_ exist. But to know the number of bounding boxes, classes, or errors, we have to actually **open** every single text file and read the text inside it.
+
+### 1. The Core Loop
+
+Instead of a one-liner `sum()`, we need a traditional `for` loop that opens the file:
+
+```python
+for entry in os.scandir("month1/week4/drone_dataset/train/labels"):
+    if entry.is_file():
+        with open(entry.path, "r") as f:
+            lines = f.readlines()
+
+        # 'lines' is now a list of strings, where each string is one bounding box!
+```
+
+### 2. Counting Boxes & Catching Empty Files
+
+If `len(lines)` is 0, the file is empty. That satisfies your check for "Images with no annotations". You can just append the filename to a list so you know which ones are empty.
+Otherwise, the number of boxes in that image is exactly equal to `len(lines)`. You can add that to a running `total_boxes` counter.
+
+### 3. Understanding the Class Distribution
+
+For this, we use a Python **Dictionary** (e.g., `class_counts = {}`).
+If we loop through the `lines`, we can split the text just like you did in the previous task: `parts = line.split()`.
+`parts[0]` is the class ID (e.g., `"0"` for drone).
+
+We check our dictionary:
+
+- If `"0"` isn't in the dictionary yet, add it: `class_counts["0"] = 1`
+- If `"0"` is already there, increment it: `class_counts["0"] += 1`
+
+By the end of scanning all files, your dictionary will look like `{"0": 4500, "1": 120}`, giving you the exact class distribution.
+
+### 4. Mathematical Checks (Aspect Ratio & Out of Bounds)
+
+Still inside that loop over the `parts`, `parts[3]` is width and `parts[4]` is height.
+
+- To find the average box size, just multiply `width * height` and add it to a running `total_area` counter. (At the very end of your script, divide `total_area` by `total_boxes`).
+- To check for weird aspect ratios, divide `width / height`. If the result is `> 10` (a very long, thin horizontal box) or `< 0.1` (a very tall, thin vertical box), append the filename to a `weird_boxes` list.
+- To check out-of-bounds, just verify if _any_ of the coordinates (x, y, w, h) are `< 0.0` or `> 1.0`.
+
+**Your first step:**
+Try writing just the `for` loop that opens the files in the `train/labels` folder, counts the total number of lines (bounding boxes), and prints that number. Don't worry about the math or the dictionaries yet. Just get the file opening and line counting working!

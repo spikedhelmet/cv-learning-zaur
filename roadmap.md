@@ -53,13 +53,13 @@
 
 ## Week 4: Datasets, Annotation & Roboflow
 
-- [ ] What makes a good detection dataset (diversity, balance, edge cases)
-- [ ] Roboflow account setup, explore existing drone/UAV datasets
-- [ ] Annotation formats: YOLO txt, COCO JSON, Pascal VOC XML
-- [ ] Data augmentation: why it matters, what Roboflow provides
-- [ ] Download and organize a drone detection dataset
-- [ ] Dataset splits: train/val/test — what they mean and why data leakage kills you
-- [ ] Understand the YOLO `data.yaml` config format
+- [x] What makes a good detection dataset (diversity, balance, edge cases)
+- [x] Roboflow account setup, explore existing drone/UAV datasets
+- [x] Annotation formats: YOLO txt, COCO JSON, Pascal VOC XML
+- [x] Data augmentation: why it matters, what Roboflow provides
+- [x] Download and organize a drone detection dataset
+- [x] Dataset splits: train/val/test — what they mean and why data leakage kills you
+- [x] Understand the YOLO `data.yaml` config format
 
 **Deliverable:** A properly structured, augmented drone dataset ready for training.
 

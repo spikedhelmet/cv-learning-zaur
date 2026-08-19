@@ -4,8 +4,8 @@ val: ../valid/images
 test: ../test/images
 
 nc: 4
-names: ["drone", "0", "1", "not drone"]
-# names: ["0", "1"]
+# names: ["drone", "0", "1", "not drone"]
+names: ["0", "1"]
 
 roboflow:
   workspace: dronenotdrone

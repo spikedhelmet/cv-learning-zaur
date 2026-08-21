@@ -12,6 +12,7 @@ __pycache__/
 # Env
 cv-env
 venv
+.venv
 env
 .env
 

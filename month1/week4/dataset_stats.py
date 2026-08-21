@@ -1,4 +1,7 @@
 import os
+import torch
+print(torch.cuda.is_available())
+print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No GPU — will use CPU")
 
 # 1. Point it at your `drone_dataset/` directory.
 # 2. Scan all label files in `train/`, `val/`, and `test/`.
@@ -64,6 +67,6 @@ def get_folder_stats(path):
     print("weird_boxes count:",len(weird_boxes))
     print("out of bound count:",len(out_of_bound_boxes))
 
-get_folder_stats("month1/week4/drone_dataset/train")
-get_folder_stats("month1/week4/drone_dataset/valid")
-get_folder_stats("month1/week4/drone_dataset/test")
+# get_folder_stats("month1/week4/drone_dataset/train")
+# get_folder_stats("month1/week4/drone_dataset/valid")
+# get_folder_stats("month1/week4/drone_dataset/test")

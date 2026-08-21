@@ -3,8 +3,7 @@ train: ../train/images
 val: ../valid/images
 test: ../test/images
 
-nc: 4
-# names: ["drone", "0", "1", "not drone"]
+nc: 2
 names: ["0", "1"]
 
 roboflow:

@@ -1,4 +1,5 @@
-path: /Users/ruslan/Desktop/Projects/other/cv-learning-zaur/month1/week4/drone_dataset
+# path: /Users/ruslan/Desktop/Projects/other/cv-learning-zaur/month1/week4/drone_dataset
+path: C:/Users/user/Desktop/Computer Vision/month1/week4/drone_dataset
 train: ../train/images
 val: ../valid/images
 test: ../test/images

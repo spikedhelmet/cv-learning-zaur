@@ -67,13 +67,13 @@
 
 ## Week 5: Training Custom YOLO Models
 
-- [ ] Fine-tuning vs training from scratch — transfer learning explained
-- [ ] Train YOLOv8/11 on your drone dataset (local or Google Colab if GPU needed)
-- [ ] Understanding training output: loss curves, mAP, precision, recall
-- [ ] What overfitting looks like and how to spot it
-- [ ] Hyperparameter basics: epochs, batch size, image size, learning rate
-- [ ] Validate your trained model on the test set
-- [ ] Export model to ONNX format (production awareness)
+- [x] Fine-tuning vs training from scratch — transfer learning explained
+- [x] Train YOLOv8/11 on your drone dataset (local or Google Colab if GPU needed)
+- [x] Understanding training output: loss curves, mAP, precision, recall
+- [x] What overfitting looks like and how to spot it
+- [x] Hyperparameter basics: epochs, batch size, image size, learning rate
+- [x] Validate your trained model on the test set
+- [x] Export model to ONNX format (production awareness)
 
 **Deliverable:** A custom-trained YOLO model that detects drones, with documented training metrics.
 

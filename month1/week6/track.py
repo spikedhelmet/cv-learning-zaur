@@ -4,13 +4,13 @@ from ultralytics import YOLO
 model = YOLO("month1/week5/train-2/weights/best.pt")
 
 cap = cv2.VideoCapture("month1/week6/drones.mp4")
-track_history = {}
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 out = cv2.VideoWriter("month1/week6/tracked_output.mp4", fourcc, 30, (frame_width, frame_height))
 
+track_history = {}
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -33,7 +33,9 @@ while cap.isOpened():
 
             if track_id not in track_history:
                 track_history[track_id] = []
-                track_history[track_id].append((cx, cy))
+            
+            # This needs to happen EVERY frame, so it must be outside the 'if' block!
+            track_history[track_id].append((cx, cy))
 
             # Keep only the last 50 positions (so the trail doesn't get infinitely long)
             if len(track_history[track_id]) > 50:

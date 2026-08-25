@@ -17,6 +17,7 @@ Your YOLO model outputs a list of bounding boxes for each frame. Frame 1: `[dron
 To a human, it's obvious these are the same drone moving right and slightly up. But to the computer, these are three completely unrelated observations. It has zero memory between frames.
 
 This breaks down immediately in real scenarios:
+
 - **Two drones cross paths.** Without tracking, the system can't tell which is which after they cross.
 - **A drone disappears behind a tree for 0.5 seconds.** Without tracking, the system thinks the drone vanished and a new one appeared.
 - **You need to count how many drones entered an area.** Without tracking, the same drone re-entering gets counted as a new one every time.
@@ -24,8 +25,9 @@ This breaks down immediately in real scenarios:
 ### What a Tracker Does
 
 A tracker sits **on top of** your detector. It takes the raw detections from YOLO and:
+
 1. Assigns a unique ID to each new object (Drone #1, Drone #2, etc.).
-2. Predicts where each tracked object *should* be in the next frame (using motion models).
+2. Predicts where each tracked object _should_ be in the next frame (using motion models).
 3. Matches new detections to existing tracks (using distance/overlap).
 4. Handles objects that temporarily disappear (occlusion) and reappear.
 
@@ -35,6 +37,7 @@ The tracker answers: **"Which object is which across time?"**
 ### Defense Context
 
 In a military C2 (Command and Control) system, tracking is non-negotiable. You don't just need to know "there's a drone." You need:
+
 - **Track ID:** "This is Target #3."
 - **Trajectory:** "It entered from the east, heading northwest."
 - **Speed:** "Moving at 15 m/s."
@@ -201,6 +204,7 @@ out.release()
 ```
 
 You'll need to get `frame_width` and `frame_height` from the capture object before the loop starts:
+
 ```python
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -211,9 +215,20 @@ frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 ## Checkpoint Questions
 
 1. What is the difference between `model.predict()` and `model.track()`? What does `persist=True` do?
+
+- Track assigns ids to the object it deems the same. Persist save and reuses that id if the object reappears on camera feed.
+
 2. Why does ByteTrack keep low-confidence detections instead of throwing them away? Give a concrete example of when this helps.
+
+- Say the object goes behind tree leaves but some part of it is showing, and then it reappears. ByteTrack keeps the low confidence object in memory as well.
+
 3. What is an "ID switch" in tracking? What causes it?
+
+- The same object gets assigned a new id. Idk what causes it.
+
 4. If you wanted to calculate a tracked object's speed in pixels per frame, what information would you need from `track_history`?
+
+- I'd need to calculate fps and velocity. Velocity by using it's coordinates.
 
 ---
 
@@ -231,16 +246,19 @@ frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 ## Supplemental Reading
 
 **For interviews:**
+
 - **"Explain the Kalman Filter in simple terms."** — "It's a two-step predict-update cycle. First, it predicts where an object will be based on its current velocity. Then, when a new measurement (detection) arrives, it blends the prediction with the measurement, weighting each by their uncertainty. Over time, it builds an increasingly accurate model of the object's motion."
 - **"What is the Hungarian Algorithm?"** — "It solves the assignment problem: given N predictions and M detections, find the optimal one-to-one matching that minimizes total cost (usually IoU distance or Euclidean distance). It runs in O(n^3) time."
 - **"How does ByteTrack differ from SORT?"** — "SORT discards low-confidence detections. ByteTrack does a two-stage matching: first match high-confidence detections to tracks, then match remaining low-confidence detections to unmatched tracks. This recovers occluded objects that other trackers lose."
 
 **For production context:**
+
 - **Visual SLAM + Tracking:** In autonomous drones, tracking is combined with Visual SLAM (Simultaneous Localization and Mapping) to build a 3D map of the environment while simultaneously tracking moving objects within it.
 - **Track fusion:** In defense systems, tracks from multiple sensors (visual camera, thermal camera, radar) are fused together. If the visual tracker loses an object behind a building, the radar tracker might still have it, maintaining continuity.
 - **Track management:** Production systems have explicit logic for track states: `TENTATIVE` (just appeared, might be noise), `CONFIRMED` (seen for N consecutive frames), `LOST` (not detected for M frames), `DELETED` (lost for too long, remove). ByteTrack handles this internally.
 
 **External resources:**
+
 - ByteTrack paper: https://arxiv.org/abs/2110.06864 — The original paper. Section 3 explains the two-stage association clearly.
 - Ultralytics Tracking Docs: https://docs.ultralytics.com/modes/track/ — Official reference for all tracking parameters.
 - "Understanding Kalman Filters" — MATLAB video series on YouTube. Excellent visual explanations of prediction and update steps.

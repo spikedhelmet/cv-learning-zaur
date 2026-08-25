@@ -79,15 +79,15 @@
 
 ---
 
-## Week 6: Multi-Object Tracking
+## Week 6: Multi-Object Tracking _(Complete)_
 
-- [ ] Detection vs Tracking: why detection alone isn't enough
-- [ ] Tracking algorithms overview: SORT, DeepSORT, ByteTrack, BoT-SORT
-- [ ] Implement ByteTrack with your custom YOLO model
-- [ ] Persistent object IDs across frames
-- [ ] Handling occlusion, re-identification, track loss
-- [ ] Count objects entering/exiting a zone (tripwire logic)
-- [ ] Record tracked video output with IDs and trails
+- [x] Detection vs Tracking: why detection alone isn't enough
+- [x] Tracking algorithms overview: SORT, DeepSORT, ByteTrack, BoT-SORT
+- [x] Implement ByteTrack with your custom YOLO model
+- [x] Persistent object IDs across frames
+- [x] Handling occlusion, re-identification, track loss
+- [x] Count objects entering/exiting a zone (tripwire logic)
+- [x] Record tracked video output with IDs and trails
 
 **Deliverable:** Live tracking pipeline that detects drones and maintains persistent IDs with visual trails.
 

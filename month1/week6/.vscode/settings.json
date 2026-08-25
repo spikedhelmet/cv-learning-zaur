@@ -1,0 +1,5 @@
+{
+    "python.defaultInterpreterPath": "/Users/ruslan/Desktop/Projects/other/cv-learning-zaur/.venv/bin/python",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.languageServer": "Pylance"
+}

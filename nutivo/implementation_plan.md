@@ -14,19 +14,19 @@ You already know how to train YOLO. This phase applies that skill to a new domai
 
 ### 1.1 — SKU-110K Dataset Setup
 
-- [ ] Download the SKU-110K dataset (public shelf detection dataset, ~11K images, 1.7M product bounding boxes)
-- [ ] Understand the dataset format (it uses CSV annotations, not YOLO format)
-- [ ] Write a conversion script: CSV → YOLO txt format
-- [ ] Split into train/val/test and create `data.yaml`
+- [x] Download the SKU-110K dataset (public shelf detection dataset, ~11K images, 1.7M product bounding boxes)
+- [x] Understand the dataset format (it uses CSV annotations, not YOLO format)
+- [x] Write a conversion script: CSV → YOLO txt format
+- [x] Split into train/val/test and create `data.yaml`
 
 **New concept:** Format conversion at scale. SKU-110K uses `image_name,x1,y1,x2,y2,class,image_width,image_height` CSV rows. You'll need to convert absolute pixel coordinates to YOLO normalized format — you already did this math in Week 4.
 
 ### 1.2 — Train Product Detector
 
-- [ ] Fine-tune YOLO11n on SKU-110K (single class: `product`)
-- [ ] Evaluate mAP on the test set
-- [ ] Test on photos you take in a local store (Bravo, Araz, etc.)
-- [ ] Identify failure cases (local packaging shapes, lighting, shelf styles)
+- [x] Fine-tune YOLO11n on SKU-110K (single class: `product`)
+- [x] Evaluate mAP on the test set
+- [x] Test on photos you take in a local store (Bravo, Araz, etc.)
+- [x] Identify failure cases (local packaging shapes, lighting, shelf styles)
 
 **Deliverable:** A YOLO model that draws bounding boxes around individual products on any shelf image.
 

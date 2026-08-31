@@ -76,71 +76,80 @@ This is the approach you want to try first. The pipeline: Detect products → Cr
 
 ---
 
-## Phase 3: Embedding Matching (if OCR fails)
+## Phase 3: Embedding Matching — Production Pipeline
 
-If OCR doesn't work well enough, this is the fallback. It's also the more "production-ready" approach used by companies like Trax and Shelf.AI.
+### 3.1 — Embedding Fundamentals [DONE]
 
-### 3.1 — Embedding Fundamentals
-
-- [ ] Understand what an embedding is (a fixed-length vector that captures the "essence" of an image)
-- [ ] Install and test CLIP (OpenAI's model that understands both images and text)
-- [ ] Generate embeddings for a few product images, visualize them, and measure cosine similarity between similar vs different products
+- [x] Understand what an embedding is (a fixed-length vector that captures the "essence" of an image)
+- [x] Install and test CLIP (OpenAI's model that understands both images and text)
+- [x] Generate embeddings for product images, measure cosine similarity between similar vs different products
+- [x] Build a matcher loop that compares query crops against a reference dictionary
 
 **New concept:** Cosine similarity. Two vectors pointing in the same direction = similar content. Cosine similarity of 1.0 = identical, 0.0 = completely unrelated.
 
-### 3.2 — Build the Reference Database
+### 3.2 — Qdrant Vector Database
 
-- [ ] Use the labeled crops from Phase 1.3 as your reference images (no extra photography needed!)
-- [ ] Generate and store an embedding for each labeled crop
-- [ ] Save the database as a simple JSON or pickle file: `{product_name: embedding_vector, health_score: ...}`
+- [ ] Install `qdrant-client` and `python-dotenv`
+- [ ] Store Qdrant Cloud credentials in a `.env` file (never hardcode API keys)
+- [ ] Create a Qdrant collection with 512-dim vectors (matching CLIP's output)
+- [ ] Upload reference product embeddings with metadata (product name, health score, category)
+- [ ] Query the collection with a crop embedding and retrieve the top match
+- [ ] Understand the difference between exact search and approximate nearest neighbor (ANN)
 
-### 3.3 — Matching Pipeline
+**New concept:** Vector databases use indexing structures (like HNSW graphs) to search through millions of vectors in milliseconds, instead of comparing against every single one linearly.
 
-- [ ] Full pipeline: shelf image → YOLO detection → crop → generate embedding → compare against database → return closest match
+### 3.3 — Expand the Reference Database
+
+- [ ] Photograph or crop 30-50 unique products for the reference DB (more coverage = fewer wrong matches)
+- [ ] Upload all reference embeddings to Qdrant with proper metadata
+- [ ] Add multiple angles/variants per product where possible (front, side, tilted)
+- [ ] Test matching accuracy with a known test set
+
+### 3.4 — Full Matching Pipeline
+
+- [ ] Full pipeline: shelf image → YOLO detection → crop → CLIP embedding → Qdrant search → return closest match
 - [ ] Set a similarity threshold (e.g., 0.85) below which the system says "unknown product"
-- [ ] Evaluate accuracy on real shelf photos
+- [ ] Evaluate accuracy on real shelf photos and log results
+- [ ] Optional: Try `clip-ViT-L-14` (768-dim, more accurate, slower) and compare against `clip-ViT-B-32`
 
-**Deliverable:** A script that takes a shelf photo and identifies products by visual similarity, returning health scores.
+**Deliverable:** A script that takes a shelf photo and identifies products by visual similarity via Qdrant, returning product names and health scores.
 
 ---
 
-## Phase 4: Full-Stack Integration (Week 8)
-
-Regardless of which identification method works (OCR or embeddings), you'll wrap it in a web app.
+## Phase 4: Full-Stack Integration
 
 ### 4.1 — FastAPI Backend
 
 - [ ] Create a FastAPI server with a `/scan` endpoint that accepts an image upload
-- [ ] Run the full pipeline (detect → identify → score) server-side
-- [ ] Return JSON: list of products with positions, names, health scores, and confidence
+- [ ] Run the full pipeline (YOLO detect → CLIP embed → Qdrant search) server-side
+- [ ] Return JSON: list of products with bounding box positions, names, health scores, and confidence
+- [ ] Add a `/products` endpoint to list all products in the Qdrant database
+- [ ] Add a `/products/add` endpoint to upload a new reference product image + metadata
 
-### 4.2 — Frontend
+### 4.2 — Frontend / App Integration
 
 - [ ] Build a simple web UI where users can upload a shelf photo (or capture from camera)
 - [ ] Display the shelf image with colored overlays (green = healthy, yellow = moderate, red = unhealthy)
 - [ ] Show a sidebar with the product list, names, and scores
+- [ ] Document the API contract so your cousin's app can call the `/scan` endpoint directly
 
-### 4.3 — Polish
+### 4.3 — Polish & Deploy
 
+- [ ] Deploy the FastAPI backend (Railway, Render, or a VPS)
 - [ ] Record a demo video
 - [ ] Write a README documenting the architecture and results
 - [ ] Prepare to explain the pipeline end-to-end in an interview
 
-**Deliverable:** A working web app where you upload a shelf photo and get a visual health score overlay.
+**Deliverable:** A working API + web app where you upload a shelf photo and get product identification with health scores.
 
 ---
 
 ## Updated Skills Map
 
-| Phase         | New CV/ML Skills                                        | New Engineering Skills              |
-| ------------- | ------------------------------------------------------- | ----------------------------------- |
-| 1. Detection  | Domain adaptation, dataset conversion at scale          | Data pipeline scripting             |
-| 2. OCR        | Text detection, text recognition, preprocessing for OCR | Fuzzy matching, text processing     |
-| 3. Embeddings | Feature extraction, cosine similarity, CLIP             | Vector databases, retrieval systems |
-| 4. Full-stack | End-to-end ML pipeline                                  | FastAPI, web frontend, deployment   |
+| Phase         | New CV/ML Skills                                        | New Engineering Skills                        |
+| ------------- | ------------------------------------------------------- | --------------------------------------------- |
+| 1. Detection  | Domain adaptation, dataset conversion at scale          | Data pipeline scripting                       |
+| 2. OCR        | Text detection, text recognition, preprocessing for OCR | Fuzzy matching, text processing               |
+| 3. Embeddings | Feature extraction, cosine similarity, CLIP, ANN search | Qdrant, vector databases, retrieval systems   |
+| 4. Full-stack | End-to-end ML pipeline                                  | FastAPI, API design, deployment, app integration |
 
----
-
-## Getting Started
-
-**Your very first step:** Download the SKU-110K dataset and write the CSV-to-YOLO conversion script. This is Phase 1.1.

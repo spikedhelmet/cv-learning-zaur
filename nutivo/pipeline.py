@@ -100,7 +100,6 @@ def scan_shelf(img_path):
     results = []
 
     for det in detections:
-        print(f"det: ${det}")
         bbox = det['bbox']
         x, y, x2, y2 = bbox
 
@@ -127,8 +126,8 @@ if __name__ == "__main__":
     results = scan_shelf(image_path)
     
     print(f"\nFound {len(results)} products:\n")
-    # for r in results:
-    #     if r["status"] == "matched":
-    #         print(f"  {r['product_name']:25s} | Confidence: {r['confidence']:.2f}")
-    #     else:
-    #         print(f"  {'UNKNOWN':25s} | Best score: {r['confidence']:.2f}")
+    for r in results:
+        if r["status"] == "matched":
+            print(f"  {r['product_name']:25s} | Confidence: {r['confidence']:.2f}")
+        else:
+            print(f"  {'UNKNOWN':25s} | Best score: {r['confidence']:.2f}")

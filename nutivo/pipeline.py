@@ -1,4 +1,3 @@
-from cv2 import rectangle
 import cv2
 import os
 import sys
@@ -19,9 +18,6 @@ client = QdrantClient(
     url=os.getenv("QDRANT_URL"),
     api_key=os.getenv("QDRANT_API_KEY"),
 )
-
-if not client.collection_exists(collection_name="products"):
-    sys.exit()
 
     
 def detect_products(image_path, confidence_threshold=0.6, min_size=20):
@@ -107,15 +103,17 @@ def scan_shelf(img_path):
         product_name = match['product_name']
         # match_conf = match['confidence']
         match["bbox"] = det["bbox"]
-        match["detection_conf"] = det["detection_conf"]
+        match["detection_conf"] = float(det["detection_conf"])
         results.append(match)
         
         det_color = (0, 0, 255) if product_name=="unknown" else (0, 255, 0)
         cv2.putText(cv2_img, str(product_name), (int(x),int(y) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, det_color, 2)
         cv2.rectangle(cv2_img, (int(x), int(y)), (int(x2), int(y2)), det_color, 2)
     
-    cv2.imwrite("annotated_output.jpg", cv2_img)
-    return results
+    # cv2.imwrite("annotated_output.jpg", cv2_img)
+    _ , img_bytes = cv2.imencode('.jpg',cv2_img)
+    return results, img_bytes.tobytes()
+
 
 if __name__ == "__main__":
     import sys

@@ -3,7 +3,7 @@ import cv2
 from ultralytics import YOLO
 
 model = YOLO('nutivo/sku-shelf.pt')
-source = "nutivo/source_images"
+source = "shelves"
 output_dir = "nutivo/cropped_images"
 results = model.predict(source, batch=8) 
 

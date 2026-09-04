@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+python-multipart
+ultralytics
+sentence-transformers
+qdrant-client
+opencv-python-headless
+python-dotenv

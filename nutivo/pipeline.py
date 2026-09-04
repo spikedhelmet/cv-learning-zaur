@@ -10,7 +10,9 @@ from dotenv import load_dotenv
 load_dotenv(".env")
 
 # Load both models once at startup
-yolo_model = YOLO("nutivo/sku-shelf.pt")
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+yolo_model = YOLO(os.path.join(BASE_DIR, "sku-shelf.pt"))
 clip_model = SentenceTransformer("clip-ViT-B-32")
 
 # Connect to Qdrant

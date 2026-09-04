@@ -1,0 +1,23 @@
+# Ignore frontend (deployed separately to Netlify)
+frontend/
+
+# Ignore documentation and learning notes
+*.md
+
+# Ignore local image testing folders
+cropped_images/
+source_images/
+reference_db/
+*.jpg
+*.jpeg
+*.png
+
+# Ignore Python cache and environments
+__pycache__/
+*.pyc
+.env
+cv-env/
+venv/
+
+# Ignore old learning scripts
+crop_products.py

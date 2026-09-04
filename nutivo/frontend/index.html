@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nutivo Shelf Scanner — AI-powered product recognition for retail shelves using YOLO detection and CLIP embeddings.">
+  <title>Nutivo — Shelf Scanner</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="toast-container" class="toast-container"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-brand">
+        <div class="header-logo">N</div>
+        <div>
+          <div class="header-title">Nutivo</div>
+          <div class="header-subtitle">Shelf Scanner</div>
+        </div>
+      </div>
+      <div class="header-status">
+        <div class="status-dot"></div>
+        <span id="api-status-text">Connecting...</span>
+      </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="scan-tab" id="nav-scan">Scan Shelf</button>
+      <button class="nav-tab" data-tab="products-tab" id="nav-products">Products</button>
+      <button class="nav-tab" data-tab="add-tab" id="nav-add">Add Product</button>
+    </nav>
+
+    <!-- ═══ Scan Tab ═══ -->
+    <div id="scan-tab" class="tab-content active">
+      <h1 class="section-title">Scan a Shelf</h1>
+      <p class="section-description">Upload a photo of a retail shelf. The AI will detect and identify every product it can see.</p>
+
+      <div class="card">
+        <div class="upload-zone" id="scan-upload-zone">
+          <input type="file" accept="image/*" id="scan-file-input">
+          <div class="upload-icon">📸</div>
+          <div class="upload-text">Drop a shelf photo here or click to browse</div>
+          <div class="upload-hint">Supports JPG, PNG, WEBP</div>
+        </div>
+
+        <div class="preview-container" id="scan-preview">
+          <div class="preview-image-wrapper">
+            <img id="scan-preview-img" alt="Selected shelf photo">
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" id="scan-btn" disabled>⚡ Scan Shelf</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="scan-results-section" style="display:none; margin-top:24px;">
+        <div class="results-header">
+          <span class="results-count" id="results-count">—</span>
+          <div class="results-stats">
+            <span class="stat-badge matched" id="matched-count">—</span>
+            <span class="stat-badge unknown" id="unknown-count">—</span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">Annotated Image</div>
+          <div class="card-description">Green = matched, Red = unknown product</div>
+          <div class="preview-image-wrapper">
+            <img id="annotated-img" alt="Annotated shelf image">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Detection Results</div>
+          <div class="card-description">All products found on the shelf</div>
+          <div class="results-grid" id="results-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Products Tab ═══ -->
+    <div id="products-tab" class="tab-content">
+      <h1 class="section-title">Product Database</h1>
+      <p class="section-description" id="products-count">Loading...</p>
+
+      <div class="products-grid" id="products-grid">
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <div class="empty-state-icon">📦</div>
+          <div class="empty-state-text">Click the "Products" tab to load.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Add Product Tab ═══ -->
+    <div id="add-tab" class="tab-content">
+      <h1 class="section-title">Add a Product</h1>
+      <p class="section-description">Upload a reference photo of a product to add it to the recognition database.</p>
+
+      <div class="card" style="max-width:560px;">
+        <div class="form-group">
+          <label class="form-label" for="product-name-input">Product Name</label>
+          <input type="text" class="form-input" id="product-name-input" placeholder="e.g. lays_paprika">
+        </div>
+
+        <div class="upload-zone" id="add-upload-zone">
+          <input type="file" accept="image/*" id="add-file-input">
+          <div class="upload-icon">🖼️</div>
+          <div class="upload-text">Drop a product photo here or click to browse</div>
+          <div class="upload-hint">Use a clear, front-facing photo</div>
+        </div>
+
+        <div class="preview-container" id="add-preview">
+          <div class="preview-image-wrapper">
+            <img id="add-preview-img" alt="Selected product photo">
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" id="add-btn" disabled>+ Add Product</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

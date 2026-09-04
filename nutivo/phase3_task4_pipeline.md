@@ -105,7 +105,7 @@ Write a function that takes an image path and returns a list of cropped regions 
 def detect_products(image_path, confidence_threshold=0.6, min_size=20):
     """
     Runs YOLO on a shelf image and returns cropped product regions.
-    
+
     Returns:
         List of dicts, each with:
             - "crop": PIL Image of the cropped product
@@ -127,7 +127,7 @@ Write a function that takes a PIL crop and queries Qdrant:
 def identify_product(crop_pil, similarity_threshold=0.85):
     """
     Encodes a crop with CLIP and queries Qdrant for the best match.
-    
+
     Returns:
         dict with "product_name", "confidence", and "status"
     """
@@ -146,7 +146,7 @@ Write the main pipeline function:
 def scan_shelf(image_path):
     """
     Full pipeline: detect products on a shelf and identify each one.
-    
+
     Returns:
         List of identified products with names, scores, and positions.
     """
@@ -158,7 +158,7 @@ def scan_shelf(image_path):
         match["bbox"] = det["bbox"]
         match["detection_conf"] = det["detection_conf"]
         results.append(match)
-    
+
     return results
 ```
 
@@ -171,10 +171,10 @@ if __name__ == "__main__":
     import sys
 
     image_path = sys.argv[1] if len(sys.argv) > 1 else "nutivo/source_images/shelf_01.jpg"
-    
+
     print(f"Scanning: {image_path}")
     results = scan_shelf(image_path)
-    
+
     print(f"\nFound {len(results)} products:\n")
     for r in results:
         if r["status"] == "matched":
@@ -184,6 +184,7 @@ if __name__ == "__main__":
 ```
 
 Then run it:
+
 ```bash
 python nutivo/pipeline.py nutivo/source_images/shelf_01.jpg
 ```
@@ -203,6 +204,7 @@ python nutivo/pipeline.py nutivo/source_images/shelf_01.jpg
 **Add Visual Output**
 
 Extend your pipeline to also produce an annotated image:
+
 1. Draw bounding boxes on the original shelf image using `cv2.rectangle`.
 2. Color-code them: green for matched products, red for unknown.
 3. Put the product name as text above each box using `cv2.putText`.
@@ -215,10 +217,12 @@ This is exactly the kind of visual output you'd show in a demo or on the fronten
 ## Supplemental Reading
 
 **For interviews:**
+
 - **"What is an ML pipeline?"** — "A pipeline is a sequence of processing stages where the output of one stage becomes the input of the next. In production, each stage should be modular (swappable), stateless (no side effects between runs), and independently testable. Our pipeline has three stages: detection (YOLO), feature extraction (CLIP), and retrieval (Qdrant)."
 - **"Why separate detection from identification?"** — "Single-stage approaches (like training YOLO to classify specific products) require retraining whenever the product catalog changes. By separating detection (generic 'find any product') from identification (embedding similarity), we can add new products by simply uploading a new reference image — zero retraining."
 
 **For production context:**
+
 - In a real deployment, model loading is the slowest part (~2-5 seconds). You load models once at server startup, not per request. This is why FastAPI + global model variables works well.
 - For high-throughput scenarios, you'd batch CLIP encoding: instead of encoding one crop at a time, collect all crops and call `model.encode([crop1, crop2, ...])` once. CLIP can encode ~100 images per second on a GPU in batch mode.
 - Edge deployment (e.g., on a phone or Raspberry Pi) would use ONNX-exported models and a local vector index (FAISS) instead of cloud Qdrant.

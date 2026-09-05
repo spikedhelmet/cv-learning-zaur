@@ -19,3 +19,6 @@ env
 # Images
 month1/week4/drone_dataset
 /cropped_images
+# Local Netlify folder
+.netlify
+/new_ref_db

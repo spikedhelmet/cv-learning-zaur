@@ -1,4 +1,5 @@
-const API_BASE = 'http://130.61.79.218:8000';
+// We are using Netlify Proxy to bypass Mixed Content restrictions!
+const API_BASE = '/api';
 
 // ─── Tab Navigation ───
 document.querySelectorAll('.nav-tab').forEach(tab => {

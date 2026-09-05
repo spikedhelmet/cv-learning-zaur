@@ -15,7 +15,7 @@ client = QdrantClient(
     api_key=os.getenv("QDRANT_API_KEY"),
     # cloud_inference=True
 )
-ref_folder = Path("nutivo/reference_db")
+ref_folder = Path("nutivo/new_ref_db")
 client.collection_exists(
     collection_name="products"
 )

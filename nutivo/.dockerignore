@@ -1,5 +1,4 @@
-# Ignore frontend (deployed separately to Netlify)
-frontend/
+# (Frontend is no longer ignored because we are hosting it natively in Python!)
 
 # Ignore documentation and learning notes
 *.md

@@ -1,5 +1,5 @@
-// We are using Netlify Proxy to bypass Mixed Content restrictions!
-const API_BASE = '/api';
+// We are serving the frontend directly from FastAPI now!
+const API_BASE = '';
 
 // ─── Tab Navigation ───
 document.querySelectorAll('.nav-tab').forEach(tab => {

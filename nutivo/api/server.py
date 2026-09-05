@@ -10,6 +10,7 @@ import tempfile
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from PIL import Image
 
 load_dotenv(".env")
@@ -101,3 +102,7 @@ async def add_products(file: UploadFile = File(...), product_name: str = Form(..
     points.append(point)
     client.upsert(collection_name="products",points=points)
     print(f"Uploaded {len(points)} products to Qdrant!")
+
+# Serve the static frontend directly from FastAPI!
+# (Make sure to put this AFTER all API routes so it doesn't override them)
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")

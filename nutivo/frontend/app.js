@@ -68,6 +68,12 @@ scanFileInput.addEventListener('change', e => {
   }
 });
 
+scanUploadZone.addEventListener('click', (e) => {
+  if (e.target !== scanFileInput) {
+    scanFileInput.click();
+  }
+});
+
 function handleScanFile(file) {
   selectedScanFile = file;
   const reader = new FileReader();
@@ -105,6 +111,7 @@ scanBtn.addEventListener('click', async () => {
     // Show annotated image
     annotatedImg.src = URL.createObjectURL(imgBlob);
     scanResultsSection.style.display = 'block';
+    scanResultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     // Populate results grid
     const matched = results.filter(r => r.status === 'matched');
@@ -228,6 +235,12 @@ addUploadZone.addEventListener('drop', e => {
 addFileInput.addEventListener('change', e => {
   if (e.target.files[0]) {
     handleAddFile(e.target.files[0]);
+  }
+});
+
+addUploadZone.addEventListener('click', (e) => {
+  if (e.target !== addFileInput) {
+    addFileInput.click();
   }
 });
 

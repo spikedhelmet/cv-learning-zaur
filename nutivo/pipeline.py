@@ -109,7 +109,7 @@ def scan_shelf(img_path):
         results.append(match)
         
         det_color = (0, 0, 255) if product_name=="unknown" else (0, 255, 0)
-        cv2.putText(cv2_img, str(product_name), (int(x),int(y) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, det_color, 2)
+        cv2.putText(cv2_img, str(product_name), (int(x),int(y) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, det_color, 3)
         cv2.rectangle(cv2_img, (int(x), int(y)), (int(x2), int(y2)), det_color, 2)
     
     # cv2.imwrite("annotated_output.jpg", cv2_img)

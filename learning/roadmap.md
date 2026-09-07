@@ -1,14 +1,12 @@
-# 8-Week Applied Computer Vision Roadmap
+# Applied Computer Vision Roadmap
 
-**Goal:** Build a portfolio-ready Defense C2 Dashboard with a CV backend. Prepare for interviews at a defense company focused on counter-drone systems.
+**Goal:** Build a portfolio-ready Defense C2 Dashboard with a CV backend. Progress into production-grade optimization, segmentation, and multi-camera systems. Prepare for interviews at a defense company focused on counter-drone systems.
 
 **Start Date:** 2026-07-29 (Day 1)
 
 ---
 
 ## Week 1: OpenCV & Image Processing Fundamentals _(Complete)_
-
-**Status:** Complete
 
 - [x] Environment setup (Python, NumPy, OpenCV, matplotlib)
 - [x] Images as NumPy matrices, BGR color space, drawing primitives
@@ -51,7 +49,7 @@
 
 ---
 
-## Week 4: Datasets, Annotation & Roboflow
+## Week 4: Datasets, Annotation & Roboflow _(Complete)_
 
 - [x] What makes a good detection dataset (diversity, balance, edge cases)
 - [x] Roboflow account setup, explore existing drone/UAV datasets
@@ -65,7 +63,7 @@
 
 ---
 
-## Week 5: Training Custom YOLO Models
+## Week 5: Training Custom YOLO Models _(Complete)_
 
 - [x] Fine-tuning vs training from scratch — transfer learning explained
 - [x] Train YOLOv8/11 on your drone dataset (local or Google Colab if GPU needed)
@@ -120,13 +118,77 @@
 
 ---
 
+## Week 9: Model Optimization & Edge Deployment
+
+- [ ] Why Python inference is too slow for production (GIL, interpreter overhead)
+- [ ] ONNX Runtime: export your YOLO model, run inference without PyTorch
+- [ ] Benchmark: PyTorch vs ONNX Runtime FPS on the same video
+- [ ] TensorRT fundamentals: what it does (layer fusion, precision calibration, kernel auto-tuning)
+- [ ] FP32 vs FP16 vs INT8 quantization — the speed/accuracy tradeoff
+- [ ] Model profiling: where does the time go? (preprocess vs inference vs postprocess vs drawing)
+- [ ] Build an optimized inference pipeline that hits maximum FPS on your hardware
+- [ ] Docker containerization of your CV pipeline (reproducible deployment)
+
+**Deliverable:** An ONNX-optimized inference pipeline with benchmark comparisons showing speedup over raw PyTorch, packaged in a Docker container.
+
+---
+
+## Week 10: Instance Segmentation
+
+- [ ] Detection vs Segmentation recap: boxes vs pixel-level masks
+- [ ] YOLO-Seg: run pre-trained YOLOv11-seg, understand mask output format
+- [ ] Mask operations: extracting individual object masks from YOLO-Seg output
+- [ ] Combining masks with original image: transparent overlays, background removal
+- [ ] Train a custom segmentation model on a drone/aircraft dataset
+- [ ] Pixel-level area calculation: estimate real-world object size from mask area + camera calibration
+- [ ] Integrate segmentation into your C2 dashboard (colored silhouettes instead of boxes)
+
+**Deliverable:** A segmentation pipeline that draws pixel-perfect drone silhouettes instead of bounding boxes, integrated into the dashboard.
+
+---
+
+## Week 11: Advanced Tracking — Re-ID & Multi-Camera
+
+- [ ] The Re-ID problem: what happens when a tracked object disappears and reappears
+- [ ] Appearance descriptors: how DeepSORT uses a feature extractor to re-identify objects
+- [ ] Build a simple Re-ID system: extract appearance features, match across track breaks
+- [ ] Multi-camera fundamentals: why track IDs from Camera A don't mean anything on Camera B
+- [ ] Homography and view mapping: projecting detections from camera view to a 2D floor plan
+- [ ] Cross-camera tracking: matching the same object seen by two different cameras
+- [ ] Heatmap generation: visualize where objects spend the most time across all cameras
+
+**Deliverable:** A multi-camera tracking demo that maintains consistent object IDs across two camera feeds and projects detections onto a 2D map.
+
+---
+
+## Week 12: Capstone — Multi-Zone Surveillance System
+
+- [ ] Design and build a complete multi-zone surveillance system from scratch
+- [ ] Multiple video inputs (phone cameras, video files, RTSP streams)
+- [ ] Per-zone threat classification: define zones with different alert levels
+- [ ] Dwell-time analysis: alert when an object stays in a zone too long
+- [ ] Track trajectory prediction: estimate where an object is heading (linear extrapolation)
+- [ ] Event correlation: detect patterns across zones (e.g., object enters Zone A then Zone B within 30 seconds)
+- [ ] Export incident reports: timestamped logs with annotated frame snapshots
+- [ ] Final portfolio polish: architecture diagram, performance benchmarks, demo video
+
+**Deliverable:** A production-grade multi-zone surveillance system with trajectory prediction, dwell-time alerts, and incident reporting — the centerpiece of your CV portfolio.
+
+---
+
 ## Key Concepts to Know for Interviews
 
 These will be woven into the weekly tasks, not studied in isolation:
 
 - **mAP (Mean Average Precision):** How detection accuracy is measured
+- **IoU (Intersection over Union):** The foundation of mAP calculation and NMS
+- **NMS (Non-Maximum Suppression):** How overlapping detections are filtered
 - **Loss:** What the model optimizes during training
 - **Overfitting:** When the model memorizes training data instead of learning patterns
 - **Data Leakage:** When test data contaminates training, giving fake-good metrics
 - **ONNX/TensorRT:** How Python prototypes become C++ production systems
 - **FPS vs Accuracy tradeoff:** Nano vs Large models, when to use which
+- **Quantization:** FP32 → FP16 → INT8 and the speed/accuracy implications
+- **Re-ID:** How tracking systems handle object disappearance and reappearance
+- **Homography:** Mapping between camera views and real-world coordinates
+- **Edge vs Cloud inference:** Latency, bandwidth, and privacy tradeoffs

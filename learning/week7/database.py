@@ -40,15 +40,3 @@ def get_recent_events(limit):
     return rows
     
 
-# Temporary test block - delete this after running!
-if __name__ == "__main__":
-    print("Initializing DB...")
-    init_db()
-    
-    print("Logging a test event...")
-    log_event("2026-09-09T16:30:00", 120, 1, "drone", 0.95, True)
-    
-    print("Fetching recent events:")
-    events = get_recent_events(5)
-    for event in events:
-        print(dict(event)) # dict() converts the sqlite3.Row into a readable dictionary

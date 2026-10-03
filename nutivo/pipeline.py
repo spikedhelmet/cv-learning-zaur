@@ -61,9 +61,37 @@ def detect_products(image_path, confidence_threshold=0.6, min_size=20):
     print("Detected Products:",detected_product_list)
     return detected_product_list
 
-def identify_product(crop, similiraty_threshold=0.85):
-    query_emb = clip_model.encode(crop).tolist()
+# def identify_product(crop, similiraty_threshold=0.85):
+#     query_emb = clip_model.encode(crop).tolist()
 
+#     results = client.query_points(
+#         collection_name="products",
+#         query=query_emb,
+#         limit=3,  # return top 3 matches
+#     )
+#     best_match = results.points[0]
+
+#     if best_match.payload:
+#         if best_match.score < similiraty_threshold:
+#             return {
+#                 "product_name": "unknown",
+#                 "confidence": best_match.score,
+#                 "status": "unknown"
+#             }
+#         else:            
+#             return {
+#                 "product_name": best_match.payload['product_name'],
+#                 "confidence": best_match.score,
+#                 "status": "matched"
+#             }
+
+#     return {
+#         "product_name": "unknown",
+#         "confidence": best_match.score,
+#         "status": "unknown_no_payload"
+#     }
+
+def identify_product_from_embedding(query_emb, similiraty_threshold=0.85):
     results = client.query_points(
         collection_name="products",
         query=query_emb,
@@ -94,14 +122,23 @@ def identify_product(crop, similiraty_threshold=0.85):
 
 def scan_shelf(img_path):
     detections = detect_products(img_path)
+    
+    if not detections:
+        print("No products detected on the shelf.")
+        return [], None
+
+    all_crops = [det['crop'] for det in detections]
+    all_embeddings = clip_model.encode(all_crops, batch_size=32).tolist()
+
     cv2_img = cv2.imread(img_path)
     results = []
 
-    for det in detections:
+    for det, emb in zip(detections, all_embeddings):
         bbox = det['bbox']
         x, y, x2, y2 = bbox
 
-        match = identify_product(det['crop'])
+        match = identify_product_from_embedding(emb)
+        # match = identify_product(det['crop'])
         product_name = match['product_name']
         # match_conf = match['confidence']
         match["bbox"] = det["bbox"]
@@ -115,6 +152,30 @@ def scan_shelf(img_path):
     # cv2.imwrite("annotated_output.jpg", cv2_img)
     _ , img_bytes = cv2.imencode('.jpg',cv2_img)
     return results, img_bytes.tobytes()
+
+# def scan_shelf(img_path):
+#     detections = detect_products(img_path)
+#     cv2_img = cv2.imread(img_path)
+#     results = []
+
+#     for det in detections:
+#         bbox = det['bbox']
+#         x, y, x2, y2 = bbox
+
+#         match = identify_product(det['crop'])
+#         product_name = match['product_name']
+#         # match_conf = match['confidence']
+#         match["bbox"] = det["bbox"]
+#         match["detection_conf"] = float(det["detection_conf"])
+#         results.append(match)
+        
+#         det_color = (0, 0, 255) if product_name=="unknown" else (0, 255, 0)
+#         cv2.putText(cv2_img, str(product_name), (int(x),int(y) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, det_color, 3)
+#         cv2.rectangle(cv2_img, (int(x), int(y)), (int(x2), int(y2)), det_color, 2)
+    
+#     # cv2.imwrite("annotated_output.jpg", cv2_img)
+#     _ , img_bytes = cv2.imencode('.jpg',cv2_img)
+#     return results, img_bytes.tobytes()
 
 
 if __name__ == "__main__":

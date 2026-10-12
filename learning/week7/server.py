@@ -1,3 +1,4 @@
+import string
 from learning.week7.database import get_recent_events
 from learning.week7.database import init_db
 from fastapi import WebSocketDisconnect
@@ -109,3 +110,9 @@ async def resume():
     shared_state["is_paused"] = False
     return {"status":"resumed"}
 
+
+# Zones
+@app.post("/api/zones")
+async def add_zone(name: str, x1: int, y1:int, x2:int, y2:int):
+    
+    return

@@ -17,7 +17,8 @@ def init_db():
         track_id INTEGER,
         class_name TEXT,
         confidence REAL,
-        zone_intrusion BOOLEAN    
+        zone_intrusion BOOLEAN,
+        zone_name TEXT
     );
     """
 
@@ -26,10 +27,10 @@ def init_db():
 
     return connection
 
-def log_event(timestamp, frame, track_id, class_name, confidence, zone_intrusion):
+def log_event(timestamp, frame, track_id, class_name, confidence, zone_intrusion, zone_name):
     cursor.execute(
-    "INSERT INTO events (timestamp, frame, track_id, class_name, confidence, zone_intrusion) VALUES (?, ?, ?, ?, ?, ?)",
-    (timestamp, frame, track_id, class_name, confidence, zone_intrusion)
+    "INSERT INTO events (timestamp, frame, track_id, class_name, confidence, zone_intrusion, zone_name) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    (timestamp, frame, track_id, class_name, confidence, zone_intrusion, zone_name)
     )
     connection.commit()
 

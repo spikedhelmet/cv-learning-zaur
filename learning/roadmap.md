@@ -91,34 +91,39 @@
 
 ---
 
-## Week 7: Defense C2 Dashboard — Backend
+## Week 7: Defense C2 Dashboard — Backend _(Complete)_
 
-- [ ] System architecture: CV pipeline → API → Frontend
-- [ ] FastAPI backend serving detection results (JSON over WebSocket or REST)
-- [ ] Stream processed video frames to the frontend (MJPEG stream or WebSocket)
-- [ ] Alert system: trigger events when a drone is detected (log, API call)
-- [ ] SQLite or simple file-based logging of detection events
-- [ ] Geo-zone logic: define restricted areas, flag intrusions
+- [x] System architecture: CV pipeline → API → Frontend
+- [x] FastAPI backend serving detection results (JSON over WebSocket or REST)
+- [x] Stream processed video frames to the frontend (MJPEG stream or WebSocket)
+- [x] Alert system: trigger events when a drone is detected (log, API call)
+- [x] SQLite or simple file-based logging of detection events (incl. `zone_name` per event)
+- [x] Geo-zone logic: define restricted areas, flag intrusions
+- [x] Challenge: REST zone management (`POST/GET/DELETE /api/zones`), multi-zone intrusion checks, breached zone reported in alerts, logs, and WebSocket payload
 
 **Deliverable:** A running FastAPI backend that processes video, runs detection+tracking, and serves results via API.
 
 ---
 
-## Week 8: Defense C2 Dashboard — Frontend & Portfolio Polish
+## Week 8: Defense C2 Dashboard — Frontend & Portfolio Polish _(Skipped by choice)_
 
-- [ ] React/Next.js frontend displaying the live detection feed
-- [ ] Real-time detection event log (WebSocket updates)
-- [ ] Dashboard UI: detection count, active tracks, alert history, zone map
-- [ ] README and documentation for the portfolio repo
-- [ ] Record a demo video walkthrough
-- [ ] Interview prep: be able to explain every component of the pipeline
-- [ ] Understand deployment context: edge devices, ONNX Runtime, TensorRT
+_Skipped: the content is frontend-only and the learner is already a professional frontend developer, so it has no CV/ML/Python learning value. The backend API contract (WebSocket `/ws/detections`, MJPEG `/video/feed`, REST zones/events/pause) is complete and documented in Week 7, so any client can consume it. Non-frontend items are folded in below._
 
-**Deliverable:** A complete, deployable Defense C2 Dashboard with live detection, tracking, and a polished frontend.
+- [~] React/Next.js frontend displaying the live detection feed _(skipped)_
+- [~] Real-time detection event log (WebSocket updates) _(skipped)_
+- [~] Dashboard UI: detection count, active tracks, alert history, zone map _(skipped)_
+- [ ] README and documentation for the portfolio repo _(moved to Week 12 capstone polish)_
+- [ ] Record a demo video walkthrough _(moved to Week 12 capstone polish)_
+- [ ] Interview prep: be able to explain every component of the pipeline _(moved to Week 12; interview questions are included in each task's supplemental reading)_
+- [ ] Understand deployment context: edge devices, ONNX Runtime, TensorRT _(covered in Week 9)_
+
+**Deliverable:** N/A (skipped). The Week 7 backend serves as the portfolio backend.
 
 ---
 
-## Week 9: Model Optimization & Edge Deployment
+## Week 9: Model Optimization & Edge Deployment _(In Progress)_
+
+_Task breakdown: Task 1 = profiling + ONNX Runtime inference + PyTorch vs ONNX benchmark (`week9/week9_task1_onnx_benchmark.md`). Task 2 = quantization (FP16/INT8), TensorRT concepts, optimized pipeline. Task 3 = Docker containerization._
 
 - [ ] Why Python inference is too slow for production (GIL, interpreter overhead)
 - [ ] ONNX Runtime: export your YOLO model, run inference without PyTorch

@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+from pydantic import BaseModel
 import string
 from learning.week7.database import get_recent_events
 from learning.week7.database import init_db
@@ -112,7 +114,39 @@ async def resume():
 
 
 # Zones
+class Zone(BaseModel):
+    name: str
+    x1: int
+    y1: int
+    x2: int
+    y2: int
+
 @app.post("/api/zones")
-async def add_zone(name: str, x1: int, y1:int, x2:int, y2:int):
+async def add_zone(zone: Zone):
+    with state_lock:
+        shared_state["zones"].append(zone.model_dump())
+        
+        return {"message": "zone added", "zone": zone.model_dump()}
+
+@app.get("/api/zones")
+async def get_zones():
+    return shared_state["zones"]
+
+@app.delete("/api/zones/{zone_name}")
+async def delete_zone(zone_name:str):
+    with state_lock:
+        shared_state["zones"] = [z for z in shared_state["zones"] if z["name"] != zone_name]
+
+        # return shared_state["zones"]
+        return
+
+@app.delete("/api/zones/{zone_name}")
+async def delete_zone(zone_name: str):
+    with state_lock:
+        before = len(shared_state["zones"])
+        shared_state["zones"] = [z for z in shared_state["zones"] if z["name"] != zone_name]
+        removed = before - len(shared_state["zones"])
+    if removed == 0:
+        raise HTTPException(status_code=404, detail=f"Zone '{zone_name}' not found")
     
-    return
+    return {"message": "zone deleted", "removed": removed}

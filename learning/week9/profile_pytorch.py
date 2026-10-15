@@ -51,10 +51,11 @@ for frame in frame_list:
 
 stats = times[10:]                       
 keys = ["preprocess", "inference", "postprocess", "plot time", "encode time"]
-means = {k: sum(t[k] for t in stats) / len(stats) for k in keys + ["wall clock"]}
+means = {k: sum(t[k] for t in stats) / len(stats) for k in keys}
 total = sum(means.values())
 
 print(f"Device: {DEVICE}")
 print(f"Total: {total}")
+
 for k in keys:
     print(f"{k:<12} {means[k]:>8.2f} ms {means[k] / total * 100:>6.1f} %")

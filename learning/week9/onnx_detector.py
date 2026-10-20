@@ -1,6 +1,7 @@
 import cv2
 import numpy
 import onnxruntime as ort
+numpy.set_printoptions(suppress=True, precision=3) # to get readable values
 
 class OnnxDetector:
     def __init__(self, model_path, providers, conf_thr=0.25, iou_thr=0.45):
@@ -31,10 +32,29 @@ class OnnxDetector:
         expanded = numpy.expand_dims(transposed, axis=0)
         tensor = numpy.ascontiguousarray(expanded)
 
-        return tensor, scale, pad_x, pad_y
+        return tensor, scale, pad_x, pad_y, h, w
 
     def postprocess(self, output, scale, pad_x, pad_y, orig_h, orig_w):
+        # print(output[0].shape)
+        tensor = output[0]
+        data = output[0][0]
+        preds = data.T
+        # print(preds[:3])
+        boxes = preds[:, :4] 
+        scores = preds[:, 4:]
+        # print(scores)
+        conf = scores.max(axis=1)
+        cls = scores.argmax(axis=1)
+        # print(best_class.shape)
+        mask = conf > self.conf_thr
+        boxes = boxes[mask]
+        conf = conf[mask]
+        cls = cls[mask]
+        print(mask.sum(), boxes.shape)
+
         
+        # best = preds[:, 4:].max(axis=1).argmax()
+        # print(best, preds[best])
 
         return
 
@@ -46,9 +66,9 @@ if __name__ == "__main__":
     ok, frame = cap.read()
     cap.release()
 
-    tensor, scale, pad_x, pad_y = detector.preprocess(frame)
+    tensor, scale, pad_x, pad_y, h, w = detector.preprocess(frame)
     output = detector.session.run(None, {detector.input_name: tensor})
-    print(output[0].shape)
+    detector.postprocess(output, scale=scale,pad_x=pad_x, pad_y=pad_y, orig_h=h, orig_w=w)
 
 
 

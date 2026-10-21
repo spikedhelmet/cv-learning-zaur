@@ -189,18 +189,43 @@ The model's raw output is 8400 guesses, most of them garbage, in the wrong coord
   -> 5.1 reshape so one row = one candidate
   -> 5.2 split box columns from score columns
   -> 5.3 best class + its score per candidate
-  -> 5.4 drop low-confidence rows             (~8400 -> a few dozen)
-  -> 5.5 center box -> corner box, NMS        (a few dozen -> 1 per object)
+  -> 5.4 drop low-confidence rows             (8400 -> ~5-50, all duplicates of the same few objects)
+  -> 5.5 center box -> corner box, NMS        (~5-50 -> 1 per object)
   -> 5.6 undo letterbox (padding, then scale)
   -> 5.7 clip to frame
   -> 5.8 Python list of tuples
 ```
 
+#### Where every variable comes from
+
+Every array in Step 5 is computed from the one before it. **Nothing is typed in by hand** except the two thresholds, `self.conf_thr` (0.25) and `self.iou_thr` (0.45), which you already stored in `__init__`. If you are unsure where a variable comes from, look it up here:
+
+| Created in | Variable             | Shape            | What it holds                                                                 |
+| ---------- | -------------------- | ---------------- | ----------------------------------------------------------------------------- |
+| 5.1        | `preds`              | `(8400, 8)`      | one row per candidate: `cx, cy, w, h, airplane, bird, drone, uav`             |
+| 5.2        | `boxes`              | `(8400, 4)`      | `cx, cy, w, h` (box center + size, 640x640 canvas pixels)                     |
+| 5.2        | `scores`             | `(8400, 4)`      | the 4 class scores                                                            |
+| 5.3        | `conf`               | `(8400,)`        | the highest of the 4 scores, per candidate                                    |
+| 5.3        | `cls`                | `(8400,)`        | which class that highest score belongs to (`0`..`3`)                          |
+| 5.4        | `boxes`, `conf`, `cls` | `(n, 4)`, `(n,)`, `(n,)` | the same three arrays, keeping only the `n` rows above `conf_thr`        |
+| 5.5        | `xywh`               | `(n, 4)`         | `x, y, w, h` with `(x, y)` = **top-left corner** (the format NMS wants)       |
+| 5.5        | `keep`               | `(k,)`           | row numbers (into the `n`-row arrays) of the boxes NMS kept; `k` = number of objects |
+| 5.5        | `xywh`, `conf`, `cls` | `(k, 4)`, `(k,)`, `(k,)` | the same arrays again, now keeping only the `k` NMS survivors            |
+| 5.6        | `x1, y1, x2, y2`     | `(k,)` each      | box corners in **original-frame** pixels                                      |
+| 5.7        | `x1, y1, x2, y2`     | `(k,)` each      | same, clamped so nothing is outside the frame                                 |
+| 5.8        | `detections`         | list of `k` tuples | the return value                                                            |
+
+The same names (`boxes`, `conf`, `cls`, `xywh`) are reassigned to filtered versions as you go: same meaning, fewer rows. Row `i` of `boxes`, `conf` and `cls` (later `xywh`, `conf`, `cls`) must always describe the **same candidate**, so whenever you filter one of them, filter all of them with the same mask or index list.
+
 Build it **one sub-step at a time**, and after every line `print(x.shape)` (and for small arrays, the values). Almost every bug in this step is a shape bug, and it is much easier to catch at the line it happens than three lines later.
 
-Open a scratch script, run one real frame through `preprocess` and `session.run`, and keep the result in a variable `output` so you can experiment.
+Run one real frame that contains an object. In `learning/drone_vid.mp4`, **frame 20** (the 21st `cap.read()`) has one uav, and the expected values for that frame are given at each sub-step below. Frame 0 may have nothing in it, which makes every check pass trivially.
+
+Code below uses `np`. Your file imports NumPy as `numpy`, so either write `numpy.` or change the import to `import numpy as np`.
 
 #### 5.1 Unwrap the output and transpose it
+
+**Goal:** get a 2D table where **one row = one candidate**.
 
 `session.run` hands you the result wrapped in **three layers**. Peel them one by one:
 
@@ -210,7 +235,7 @@ Open a scratch script, run one real frame through `preprocess` and `session.run`
 | `output[0]`    | `ndarray`, `(1, 8, 8400)`         | That output node's tensor. The leading `1` is the **batch** axis: you fed 1 image, so there is 1 result. Mirror image of the `expand_dims(axis=0)` you did in preprocess.             |
 | `output[0][0]` | `ndarray`, `(8, 8400)`            | The prediction for image #0 in the batch. This is the actual data.                                                                                                                    |
 
-Now look at what `(8, 8400)` means. It is a table with **8 rows and 8400 columns**. Each **column** is one candidate box; each **row** is one attribute across all candidates:
+`(8, 8400)` is a table with **8 rows and 8400 columns**. Each **column** is one candidate box; each **row** is one attribute across all candidates:
 
 ```
               cand 0   cand 1   cand 2   ...   cand 8399
@@ -224,9 +249,9 @@ row 6  drone   0.91     0.88    0.00     ...
 row 7  uav     0.05     0.04    0.00     ...
 ```
 
-(Numbers are illustrative.) So to read "everything about candidate 0" you would have to read **down a column**: `data[:, 0]`. That is awkward, because NumPy row-filtering, `cv2.dnn.NMSBoxes`, and the final list all think in terms of **one row per item**.
+(Numbers are illustrative.) To read "everything about candidate 0" you would have to read **down a column**: `data[:, 0]`. That is awkward, because NumPy row-filtering, `cv2.dnn.NMSBoxes`, and the final list all think in terms of **one row per item**.
 
-**Transpose** swaps rows and columns: `(8, 8400)` becomes `(8400, 8)`. Now row `i` is candidate `i`, and the 8 columns are `cx, cy, w, h, airplane, bird, drone, uav`:
+**Transpose** (`.T`) swaps rows and columns: `(8, 8400)` becomes `(8400, 8)`. Now row `i` is candidate `i`, and the 8 columns are `cx, cy, w, h, airplane, bird, drone, uav`:
 
 ```
           cx     cy     w     h    airplane  bird  drone  uav
@@ -246,29 +271,49 @@ a.T                          # shape (3, 2): [[1, 4], [2, 5], [3, 6]]
 
 Column `[1, 4]` became row `[1, 4]`.
 
+**Code:**
+
+```python
+data = output[0][0]     # (8, 8400)  peel the list, then the batch axis
+preds = data.T          # (8400, 8)  one row per candidate
+```
+
 **Trap:** `output[0].T` (without the second `[0]`) gives shape `(8400, 8, 1)`, not `(8400, 8)`. `.T` on an N-dimensional array reverses **all** axes, so the batch axis of size 1 moves to the end instead of disappearing. Drop the batch axis first, then transpose.
 
 **Why the model emits this "sideways" layout at all:** the network computes each attribute as a whole feature map (one Conv output channel = one attribute over every grid cell), so channels-first is its natural layout. Transposing is the postprocessor's job.
 
 **Check:** `preds.shape == (8400, 8)`. Print `preds[:3]` and confirm columns 0-3 look like pixel values (0-640) and columns 4-7 look like probabilities (0-1).
 
+- NumPy may print in scientific notation, e.g. `1.39608660e+01`. `e+01` means "times 10", so that is `13.96`, a pixel value. `2.68e-07` is `0.000000268`, a score of essentially zero. Put `np.set_printoptions(suppress=True, precision=3)` once at the top of the file to get readable output.
+- Rows 0-2 are the top-left grid cells of the canvas, which with this video is the gray padding (`pad_y = 140`), so their scores being ~0 is correct, not a bug.
+
 #### 5.2 Split box columns from score columns
 
-Slicing syntax `arr[rows, cols]`, where `:` means "all":
+**Goal:** separate "where is it" from "what is it", because the rest of the funnel treats them differently.
 
-- `preds[:, :4]` = all rows, columns 0 up to (not including) 4 = `cx, cy, w, h`, shape `(8400, 4)`
-- `preds[:, 4:]` = all rows, columns 4 to the end = the 4 class scores, shape `(8400, 4)`
+Slicing syntax is `arr[rows, cols]`, where `:` means "all":
+
+```python
+boxes = preds[:, :4]    # (8400, 4)  all rows, columns 0,1,2,3   = cx, cy, w, h
+scores = preds[:, 4:]   # (8400, 4)  all rows, columns 4 to end  = the class scores
+```
 
 **Why `4:` instead of `4:8`:** it keeps the code correct for any class count. Same code works for an 80-class COCO model.
 
+**Check:** both shapes are `(8400, 4)`.
+
 #### 5.3 Pick the best class for each candidate
 
-Each candidate has 4 scores (one per class). You want, per row, **the highest score** (that is the confidence) and **which column it was in** (that is the class id).
+**Goal:** turn 4 scores per candidate into **one confidence** (`conf`) and **one class id** (`cls`).
 
-- `scores.max(axis=1)`: maximum **across the columns** of each row, giving shape `(8400,)`
-- `scores.argmax(axis=1)`: **index** of that maximum, giving shape `(8400,)`, values in `0..3`
+Each row of `scores` has 4 numbers, one per class. You want, per row, **the highest score** (that is the confidence) and **which column it was in** (that is the class id):
 
-`axis=1` means "collapse the column axis". `axis=0` would collapse rows instead and give you one number per class (the best candidate for each class), which is not what you want.
+```python
+conf = scores.max(axis=1)      # (8400,)  highest score in each row
+cls = scores.argmax(axis=1)    # (8400,)  column index of that score: 0..3
+```
+
+`axis=1` means "collapse the column axis", so you get one number per row. `axis=0` would collapse rows instead and give you one number per class (the best candidate for each class), which is not what you want.
 
 ```python
 s = np.array([[0.1, 0.7, 0.2],
@@ -277,31 +322,66 @@ s.max(axis=1)     # [0.7, 0.9]
 s.argmax(axis=1)  # [1,   0  ]   -> row 0 is class 1, row 1 is class 0
 ```
 
-With your model, `cls == 2` means `drone`. Keep the class id: in Step 6 you will compare it with what PyTorch reports.
+Class ids for your model: `0 airplane, 1 bird, 2 drone, 3 uav`. Keep `cls`: in Step 6 you compare it with what PyTorch reports.
+
+**Naming:** call them `conf` and `cls`, not something like `best_class`. `scores.max` is a score, not a class, and 5.4 onwards refers to these names.
+
+**Check:** both shapes are `(8400,)`. `conf.max()` on frame 20 is about `0.60`.
 
 #### 5.4 Throw away low-confidence candidates (boolean mask)
 
-`conf > self.conf_thr` does not return one True/False. It compares **every element** and returns a boolean array of the same shape, `(8400,)`. Indexing an array with a boolean array keeps only the positions that are `True`:
+**Goal:** go from 8400 rows to the few dozen that are probably real, **keeping `boxes`, `conf` and `cls` aligned**.
+
+**Inputs:** `boxes` from 5.2, `conf` and `cls` from 5.3, and the threshold `self.conf_thr` from `__init__`. All of them already exist. You do not write any numbers in.
+
+`conf > self.conf_thr` does not return one True/False. It compares **every element** and returns a boolean array of the same shape, `(8400,)`. Indexing an array with a boolean array keeps only the positions that are `True`. It is like JavaScript's `.filter`, except the decisions are computed first as their own array and then applied by position:
+
+```js
+// JS equivalent
+const mask = conf.map(c => c > 0.25);           // [false, true, false, true]
+const kept = conf.filter((_, i) => mask[i]);     // keep where mask is true
+```
 
 ```python
-conf = np.array([0.02, 0.91, 0.00, 0.88])
+conf = np.array([0.02, 0.91, 0.00, 0.88])   # toy values, NOT something you type in
 mask = conf > 0.25          # [False, True, False, True]
 conf[mask]                  # [0.91, 0.88]
 boxes[mask]                 # keeps rows 1 and 3 of boxes -> shape (2, 4)
 ```
 
-Apply the **same** mask to `boxes`, `conf`, and `cls` so that row `i` of each still refers to the same candidate. On a typical frame this shrinks 8400 rows to tens.
+Because the mask is just "which positions to keep", you can compute it once from `conf` and apply it to `boxes` and `cls` too, even though they have no confidence values of their own. On a 2D array such as `boxes`, each `True` keeps a **whole row** (all 4 numbers). The mask must be as long as the first axis.
+
+**Code:**
+
+```python
+mask = conf > self.conf_thr     # (8400,)  True/False per candidate
+if mask.sum() == 0:             # nothing confident on this frame
+    return []
+boxes = boxes[mask]             # (n, 4)
+conf = conf[mask]               # (n,)
+cls = cls[mask]                 # (n,)
+```
 
 **Why filter first:** NMS compares boxes pairwise (cost grows roughly with n²). 8400² is about 70 million comparisons; 30² is 900.
 **Why a mask instead of `for i in range(8400): if conf[i] > thr`:** the mask runs as one C loop inside NumPy. The Python loop pays interpreter overhead 8400 times per frame. Write the loop version once, time both with `perf_counter`, and record the ratio (you need it for checkpoint question 4).
 
-**Check:** print `mask.sum()` (number of survivors). On a frame with one drone, expect roughly 5-50. If it is 0 on a frame that clearly has a drone, your preprocessing is wrong (likely BGR/RGB or forgetting `/ 255`).
+**Check:** `mask.sum()` on frame 20 is **11**. Print the survivors with `print(np.column_stack([boxes, conf, cls]))`. You will see 11 rows that are **nearly identical** (center about `(285, 469)`, size about `58 x 30`, all `cls == 3`). That is not one detection. It is 11 separate predictions of the same uav, and 5.5 exists to remove the extra 10. If `mask.sum()` is 0 on a frame that clearly has a drone, your preprocessing is wrong (likely BGR/RGB or forgetting `/ 255`).
 
 #### 5.5 Convert to NMS format and run NMS
 
-Why so many survivors for one drone: neighboring grid cells (and neighboring scales) all "see" the same drone and each predicts a box for it. NMS (non-maximum suppression) keeps the highest-scoring box and deletes any other box that overlaps it by more than `iou_thr` IoU (intersection area / union area).
+**Goal:** from the ~11 duplicates per object, keep **one box per object**.
 
-The model gives boxes as **center + size**. `NMSBoxes` wants **top-left corner + size**:
+**Why there are duplicates:** the model splits the image into grid cells at three scales, and every cell makes its own guess. A drone covers several cells, so several cells all report "uav here" with slightly different boxes.
+
+**What NMS (non-maximum suppression) does** is a simple greedy loop:
+
+1. Take the box with the highest `conf` and keep it.
+2. Delete every remaining box that overlaps it by more than `iou_thr` (0.45). Overlap is measured as **IoU** = intersection area / union area: `1.0` = identical boxes, `0` = not touching.
+3. Repeat with the highest-`conf` box still left, until none are left.
+
+Duplicates of the same drone overlap by about 0.9, so they are deleted. Two different drones do not overlap, so both are kept. OpenCV already implements this loop as `cv2.dnn.NMSBoxes`; you only call it.
+
+**Step A, convert the box format.** `NMSBoxes` wants each box as `[x, y, w, h]` with `(x, y)` = **top-left corner**. The model gave you the **center** `(cx, cy)`. Moving from the center to the top-left corner means going left by half the width and up by half the height:
 
 ```
           w
@@ -312,33 +392,60 @@ The model gives boxes as **center + size**. `NMSBoxes` wants **top-left corner +
          +---------+
 ```
 
-Compute this on the whole column at once (`boxes[:, 0]` is the `cx` column of every surviving row), not row by row. To glue the four resulting columns back into one `(n, 4)` array, use `np.stack([...], axis=1)` or `np.column_stack([...])`.
+Do it on whole columns at once (`boxes[:, 0]` is the `cx` of every surviving row), then glue the four columns back together:
 
-Then:
-
+```python
+x = boxes[:, 0] - boxes[:, 2] / 2     # (n,)  cx - w/2
+y = boxes[:, 1] - boxes[:, 3] / 2     # (n,)  cy - h/2
+w = boxes[:, 2]                       # (n,)
+h = boxes[:, 3]                       # (n,)
+xywh = np.stack([x, y, w, h], axis=1) # (n, 4)
 ```
+
+**Step B, run NMS.**
+
+```python
 keep = cv2.dnn.NMSBoxes(xywh.tolist(), conf.tolist(), self.conf_thr, self.iou_thr)
+if len(keep) == 0:
+    return []
+keep = np.array(keep).flatten()       # (k,)  e.g. [3]
 ```
 
 - `.tolist()` converts NumPy arrays into plain Python lists, which is the most portable thing to pass to OpenCV's Python bindings.
-- `keep` holds **indices into the filtered arrays** (from 5.4), not into the original 8400. So `conf[keep[0]]` is the confidence of the first kept box.
-- If nothing survived the mask, `keep` is an empty tuple `()`. Return `[]` early if `len(keep) == 0` (or if `mask.sum() == 0` before even calling NMS).
-- Wrap with `np.array(keep).flatten()` so you always get a flat int array regardless of OpenCV version.
+- When nothing survives, `NMSBoxes` returns an empty tuple `()`, hence the `len(keep) == 0` check. `np.array(...).flatten()` gives you a flat int array regardless of OpenCV version.
 
-**Class-agnostic vs per-class:** `NMSBoxes` lets a `drone` box suppress an overlapping `bird` box. Ultralytics does NMS **per class** by default. If in Step 6 you see PyTorch reporting more boxes than you, switch to `cv2.dnn.NMSBoxesBatched(xywh, conf, cls, conf_thr, iou_thr)`, which takes the class ids as an extra argument and only suppresses within the same class.
+**Step C, apply `keep`.** `NMSBoxes` does **not** return boxes. It returns **row numbers** into your `n`-row arrays: "rows 3 and 7 survived". Use them to pick those rows, exactly like the mask in 5.4 but with a list of row numbers instead of True/False:
+
+```python
+xywh = xywh[keep]     # (k, 4)
+conf = conf[keep]     # (k,)
+cls = cls[keep]       # (k,)
+```
+
+**Trap:** if you skip Step C, everything after this point still works on all `n` duplicates and you return 11 boxes instead of 1. Also, the `x, y, w, h` variables from Step A still have `n` rows; do not reuse them in 5.6. Read them back out of the filtered `xywh`.
+
+**Class-agnostic vs per-class:** `NMSBoxes` lets a `drone` box suppress an overlapping `bird` box. Ultralytics does NMS **per class** by default. If in Step 6 you see PyTorch reporting more boxes than you, switch to `cv2.dnn.NMSBoxesBatched(xywh.tolist(), conf.tolist(), cls.tolist(), self.conf_thr, self.iou_thr)`, which takes the class ids as an extra argument and only suppresses within the same class.
+
+**Check:** on frame 20, `keep` is `[3]` (the row with `conf` 0.602, the highest of the 11), and after Step C `xywh.shape == (1, 4)`.
 
 #### 5.6 Undo the letterbox (map back to the original frame)
 
-Every number so far is in **640x640 canvas pixels**. Preprocess did two things, in this order: (1) shrink by `scale`, (2) shift by `(pad_x, pad_y)`. To undo, reverse the order: **first remove the shift, then undo the shrink.**
+**Goal:** convert the `k` surviving boxes from **640x640 canvas pixels** to **original-frame pixels**, as two corners `(x1, y1)` and `(x2, y2)`.
 
-```
-x1 = (x     - pad_x) / scale
-y1 = (y     - pad_y) / scale
-x2 = (x + w - pad_x) / scale
-y2 = (y + h - pad_y) / scale
+**Inputs:** `xywh` (now `(k, 4)`) from 5.5 Step C, and `scale`, `pad_x`, `pad_y` passed in from `preprocess`.
+
+Preprocess did two things, in this order: (1) **shrink** the frame by `scale`, (2) **shift** it down/right by `(pad_x, pad_y)` onto the gray canvas. To undo, reverse the order: **first remove the shift (subtract the pad), then undo the shrink (divide by scale).** Each line below does both, in that order:
+
+```python
+x, y, w, h = xywh[:, 0], xywh[:, 1], xywh[:, 2], xywh[:, 3]   # (k,) each
+
+x1 = (x     - pad_x) / scale     # top-left x
+y1 = (y     - pad_y) / scale     # top-left y
+x2 = (x + w - pad_x) / scale     # bottom-right x
+y2 = (y + h - pad_y) / scale     # bottom-right y
 ```
 
-`(x + w, y + h)` is the bottom-right corner in canvas space. Converting both corners (rather than corner + size) gives you the `(x1, y1, x2, y2)` format directly. Note the width and height are only affected by `scale`, never by padding (padding moves a box; it does not resize it).
+`(x + w, y + h)` is the bottom-right corner in canvas space. Converting both corners (rather than corner + size) gives you the `(x1, y1, x2, y2)` format directly. Width and height are only affected by `scale`, never by padding (padding moves a box; it does not resize it).
 
 **Worked example with your video.** Frames are `1280x720`:
 
@@ -362,30 +469,74 @@ In the original frame the box is 80x40 pixels at (600, 300). Sanity check: twice
 
 With this video `pad_x` is 0, so a horizontal error would never show up. A bug that mixes up `pad_x` and `pad_y` would only shift boxes vertically by 280 px. Watch for that in your saved images.
 
+**Check:** on frame 20, `x1, y1, x2, y2` are about `512.0, 627.3, 628.7, 687.7`.
+
 #### 5.7 Clip to the frame
 
-A drone at the edge of the frame can get a predicted box that extends a few pixels past the edge, giving `x1 = -3` or `x2 = 1284`. Negative coordinates break array slicing (Python treats `-3` as "3 from the end") and drawing. Clamp: x values to `[0, orig_w]`, y values to `[0, orig_h]`. `np.clip(arr, lo, hi)` does this to a whole array, or use `max(0, min(v, hi))` per value.
+**Goal:** make sure no corner lies outside the original frame.
+
+A drone at the edge of the frame can get a predicted box that extends a few pixels past the edge, giving `x1 = -3` or `x2 = 1284`. Negative coordinates break array slicing (Python treats `-3` as "3 from the end") and drawing.
+
+`np.clip(arr, lo, hi)` takes an array and two limits. `lo` and `hi` are not variables you already have; they are the **lower** and **upper** limit you choose. Every value below `lo` becomes `lo`, every value above `hi` becomes `hi`, everything in between is unchanged:
+
+```python
+np.clip(np.array([-3, 50, 1284]), 0, 1280)   # [0, 50, 1280]
+```
+
+For a box, the limits are the frame edges. x values must lie in `[0, orig_w]` and y values in `[0, orig_h]`. Those are different ranges (1280 vs 720 here), so clip the x arrays and the y arrays separately:
+
+```python
+x1 = np.clip(x1, 0, orig_w)
+x2 = np.clip(x2, 0, orig_w)
+y1 = np.clip(y1, 0, orig_h)
+y2 = np.clip(y2, 0, orig_h)
+```
+
+`orig_w` and `orig_h` are the `postprocess` arguments; that is exactly why the signature asks for them.
+
+**Trap:** `np.clip([x1, y1, x2, y2], lo, hi)` with one pair of limits would clip y against the frame width, so a box near the bottom edge would not be clipped at all.
+
+**Check:** on frame 20 nothing changes (the box is well inside `1280x720`). To see clipping work, call `np.clip(np.array([-3.0, 1300.0]), 0, 1280)` in a shell.
 
 #### 5.8 Build the output list
 
-For each index in `keep`, build `(x1, y1, x2, y2, conf, cls)` and append it. A Python loop is fine here: after NMS there are only a handful of boxes.
+**Goal:** turn the `k`-long arrays into a list of `k` plain tuples, the return value of `postprocess`.
 
-Convert NumPy scalars to Python types (`float(...)`, `int(...)`). `np.float32` values print as `np.float32(0.91)`, do not serialize to JSON (your Week 7 backend writes detections to a database), and can surprise you in comparisons.
+Row `i` of `x1, y1, x2, y2, conf, cls` is detection `i`. A Python loop is fine here: after NMS there are only a handful of boxes.
+
+```python
+detections = []
+for i in range(len(keep)):
+    detections.append((
+        float(x1[i]), float(y1[i]), float(x2[i]), float(y2[i]),
+        float(conf[i]),
+        int(cls[i]),
+    ))
+return detections
+```
+
+**Why `float(...)` / `int(...)`:** NumPy scalars such as `np.float32` print as `np.float32(0.91)`, do not serialize to JSON (your Week 7 backend writes detections to a database), and can surprise you in comparisons.
+
+**Check:** on frame 20, `postprocess` returns
+`[(512.0, 627.3, 628.7, 687.7, 0.602, 3)]` (digits after the first decimal may differ slightly): one uav.
 
 #### 5.9 `detect(self, frame)`
 
 Chain the three stages so callers (Step 6, Step 7, the challenge) only need one call:
 
+```python
+def detect(self, frame):
+    tensor, scale, pad_x, pad_y = self.preprocess(frame)
+    output = self.session.run(None, {self.input_name: tensor})
+    h, w = frame.shape[:2]
+    return self.postprocess(output, scale, pad_x, pad_y, h, w)
 ```
-tensor, scale, pad_x, pad_y = self.preprocess(frame)
-output = self.session.run(None, {self.input_name: tensor})
-h, w = frame.shape[:2]
-return self.postprocess(output, scale, pad_x, pad_y, h, w)
-```
+
+If your `preprocess` also returns `h, w` (6 values), unpack all 6 and drop the `frame.shape` line. Either way, the number of names on the left must match the number of values `preprocess` returns.
 
 #### Done when
 
-1. `detector.detect(frame)` on a frame with a visible drone returns one tuple (or a few, if there are several objects) with `cls == 2` or `3` and a confidence above your threshold.
+1. `detector.detect(frame)` on a frame with a visible drone returns one tuple (or a few, if there are several objects) with `cls == 2` or `3` and a confidence above your threshold. On frame 20 of `drone_vid.mp4`, that is the single uav tuple from the 5.8 check.
 2. You draw the boxes with `cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)` and save with `cv2.imwrite`, and the box sits **tightly** on the drone.
 3. A frame with no objects returns `[]` without crashing.
 
@@ -398,46 +549,102 @@ If the picture looks wrong, use the symptom to locate the bug:
 | Box centered on the bottom-right of the drone         | Forgot the center-to-corner conversion (used `cx, cy` as top-left)                                    |
 | `IndexError` / weird shape `(8400, 8, 1)`             | Transposed before removing the batch axis                                                             |
 | Zero detections on obvious frames                     | Preprocessing bug: BGR/RGB, missing `/ 255`, or `.T` wrong so you are reading scores from box columns |
-| Many overlapping boxes on one drone                   | NMS not applied, or indices from `keep` applied to the unfiltered arrays                              |
-| Crash on empty frames                                 | Not handling `NMSBoxes` returning `()`                                                                |
+| Many overlapping boxes on one drone                   | NMS not applied, `keep` not applied (5.5 Step C), or 5.6 reusing the unfiltered `x, y, w, h`          |
+| Crash on empty frames                                 | Not handling `NMSBoxes` returning `()`, or `mask.sum() == 0`                                          |
 
 ### Step 6: Verify correctness before benchmarking
+
+**Goal:** prove your ONNX detector gives the same answers as Ultralytics' PyTorch path before you time anything.
 
 Run the PyTorch model and your `OnnxDetector` on the same 50 frames and compare:
 
 - number of detections per frame
 - for matched boxes, the maximum absolute difference in corner coordinates (expect a few pixels at most) and in confidence (expect about 0.01 or less)
 
-Also draw ONNX boxes on a few frames and save them to disk to check by eye.
+**Getting the PyTorch boxes in the same format as yours:**
 
-**Use identical thresholds on both sides.** Ultralytics' default IoU threshold for `predict` is `0.7`, not the `0.45` your detector uses, so pass them explicitly: `model.predict(frame, conf=0.25, iou=0.45, verbose=False)`. Different thresholds make detection counts differ even when both implementations are correct.
+```python
+r = model.predict(frame, conf=0.25, iou=0.45, rect=False, verbose=False)[0]
+pt_boxes = r.boxes.xyxy.cpu().numpy()          # (k, 4)  x1, y1, x2, y2, original-frame pixels
+pt_conf = r.boxes.conf.cpu().numpy()           # (k,)
+pt_cls = r.boxes.cls.cpu().numpy().astype(int) # (k,)
+```
+
+**Matching boxes:** this video has one object per frame almost everywhere, so when both sides return one box, compare them directly: `np.abs(np.array(onnx_det[0][:4]) - pt_boxes[0]).max()`. If counts differ on a frame, print both lists for that frame and look. That mismatch is the interesting case.
+
+**Use identical settings on both sides.** Two Ultralytics defaults differ from your detector, and either one alone makes results differ even when both implementations are correct:
+
+| Setting      | Ultralytics `predict` default                                                  | Your `OnnxDetector`   | Fix                             |
+| ------------ | ------------------------------------------------------------------------------ | --------------------- | ------------------------------- |
+| IoU for NMS  | `0.7`                                                                          | `0.45`                | pass `iou=0.45`                 |
+| Input size   | `rect=True`: letterbox with **minimal** padding, so a 16:9 frame becomes **384x640**, not 640x640 | always 640x640 | pass `rect=False`              |
+
+Measured on frame 20: with the defaults, PyTorch reports the uav at `conf 0.715`; with `rect=False` it reports `0.602` and corners identical to the ONNX result to one decimal. The 384x640 input has different padding, so the network literally sees a different image. (With `verbose=True` the log line shows the input shape, e.g. `0: 384x640 1 uav`.)
+
+Also draw ONNX boxes on a few frames and save them to disk to check by eye.
 
 **Why:** a fast but wrong pipeline is worthless, and a bug in letterbox un-mapping gives boxes that look plausible but are systematically shifted. Never publish a benchmark number for an implementation you have not verified.
 
 ### Step 7: Benchmark (`benchmark.py`)
 
-Preload 300 frames. Warm up each contender with 20 iterations, then time 300 calls with `perf_counter`. Contenders:
+**Goal:** a fair latency comparison of four ways to run the same model.
+
+Preload 300 frames into a list. For each contender, warm up with 20 calls (results thrown away), then time 300 calls with `perf_counter`. Contenders:
 
 | Contender   | How                                                                       |
 | ----------- | ------------------------------------------------------------------------- |
-| PyTorch CPU | `model.predict(..., device="cpu")`                                        |
-| PyTorch MPS | `model.predict(..., device="mps")`                                        |
-| ORT CPU     | `OnnxDetector` with `["CPUExecutionProvider"]`                            |
-| ORT CoreML  | `OnnxDetector` with `["CoreMLExecutionProvider", "CPUExecutionProvider"]` |
+| PyTorch CPU | `model.predict(frame, device="cpu", conf=0.25, iou=0.45, rect=False, verbose=False)` |
+| PyTorch MPS | same, with `device="mps"`                                                 |
+| ORT CPU     | `OnnxDetector(..., ["CPUExecutionProvider"]).detect(frame)`               |
+| ORT CoreML  | `OnnxDetector(..., ["CoreMLExecutionProvider", "CPUExecutionProvider"]).detect(frame)` |
 
-For each, report mean, p50, p95 latency in ms and FPS (`1000 / mean`). Measure **end to end** (preprocess + inference + postprocess) so the comparison is fair, since Ultralytics' `.speed` numbers include its own pre and post.
+`rect=False` matters here too: with the default `rect=True`, PyTorch processes a 384x640 input (40% fewer pixels) and would win partly because it does less work, not because it is faster.
 
-For the CoreML run, print `sess.get_providers()` to confirm it was activated. Unsupported ops silently fall back to CPU, so the "CoreML" number might partly be CPU.
+Measure **end to end**, i.e. the whole `predict(...)` or `detect(...)` call (preprocess + inference + postprocess), so the comparison is fair, since Ultralytics' `.speed` numbers include its own pre and post.
+
+Skeleton for one contender (`run` is whatever single-frame call that contender makes):
+
+```python
+for frame in frames[:20]:          # warm-up, not timed
+    run(frame)
+
+times_ms = []
+for frame in frames:               # 300 timed calls
+    t0 = time.perf_counter()
+    run(frame)
+    times_ms.append((time.perf_counter() - t0) * 1000)
+
+t = np.array(times_ms)
+mean, p50, p95 = t.mean(), np.percentile(t, 50), np.percentile(t, 95)
+fps = 1000 / mean
+```
+
+For each contender report mean, p50, p95 latency in ms and FPS.
+
+For the CoreML run, print `detector.session.get_providers()` to confirm it was activated. Unsupported ops silently fall back to CPU, so the "CoreML" number might partly be CPU.
 
 **Why p95:** a system averaging 30 ms but spiking to 120 ms every 20th frame will look fine on a mean and feel broken in use.
 **Why a separate warm-up for CoreML:** the first `run` compiles the graph for the Apple Neural Engine/GPU and can take seconds.
 
 ### Step 8: Session option experiments
 
-With ORT CPU only, vary:
+**Goal:** see what ORT's own knobs do, on ORT CPU only.
+
+Session options are set on an `ort.SessionOptions` object and passed when the session is created; they cannot be changed afterwards:
+
+```python
+opts = ort.SessionOptions()
+opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_DISABLE_ALL   # or ORT_ENABLE_ALL
+opts.intra_op_num_threads = 2
+session = ort.InferenceSession(model_path, sess_options=opts, providers=["CPUExecutionProvider"])
+```
+
+Your `OnnxDetector.__init__` does not take options yet. Add an optional `sess_options=None` parameter and pass it through to `ort.InferenceSession`, so existing calls keep working.
+
+Vary, timing each configuration with the Step 7 skeleton:
 
 - `graph_optimization_level`: `ORT_DISABLE_ALL` vs `ORT_ENABLE_ALL`
-- `intra_op_num_threads`: 1, 2, 4, and the number of performance cores on your machine
+- `intra_op_num_threads`: 1, 2, 4, and the number of performance cores on your machine (`sysctl -n hw.perflevel0.physicalcpu` prints it; on this Mac it is 4, so 4 covers both)
 
 Record the effect. **Why:** this shows what graph optimization buys you and that more threads is not always faster (synchronization overhead and efficiency/performance core scheduling on Apple Silicon).
 

@@ -63,7 +63,8 @@ class OnnxDetector:
         x = cx - w/2
         y = cy - h/2
         xywh = numpy.stack([x, y, w, h], axis=1)
-        keep = cv2.dnn.NMSBoxes(xywh.tolist(), conf.tolist(), self.conf_thr, self.iou_thr)
+        # per-class NMS, same as ultralytics (a drone box can't suppress a uav box)
+        keep = cv2.dnn.NMSBoxesBatched(xywh.tolist(), conf.tolist(), cls.tolist(), self.conf_thr, self.iou_thr)
         if len(keep) == 0:
             return []
         keep = numpy.array(keep).flatten()
@@ -71,6 +72,8 @@ class OnnxDetector:
         xywh = xywh[keep]
         conf = conf[keep]
         cls = cls[keep]
+
+        x, y, w, h = xywh[:, 0], xywh[:, 1], xywh[:, 2], xywh[:, 3]   # (k,) each
 
         #remove the shift
         x1 = (x - pad_x) / scale
@@ -97,7 +100,7 @@ class OnnxDetector:
     def detect(self, frame):
         tensor, scale, pad_x, pad_y, h, w = self.preprocess(frame)
         output = self.session.run(None, {self.input_name: tensor})
-        h, w = frame.shape[:2]
+
         return self.postprocess(output, scale, pad_x, pad_y, h, w)
 
 
@@ -117,27 +120,37 @@ class OnnxDetector:
 
 #     cap.release()
 
-if __name__ == "__main__":
-    detector = OnnxDetector("learning/drone-model.onnx", ["CPUExecutionProvider"])
+# if __name__ == "__main__":
+#     detector = OnnxDetector("learning/drone-model.onnx", ["CPUExecutionProvider"])
 
-    cap = cv2.VideoCapture("learning/drone_vid.mp4")
-    frames = []
+#     cap = cv2.VideoCapture("learning/drone_vid.mp4")
+#     frames = []
 
-    while cap.isOpened():
-        ok, frame = cap.read()
-        if not ok:
-            break
+#     while cap.isOpened():
+#         ok, frame = cap.read()
+#         if not ok:
+#             break
         
-        frames.append(frame)
-        if len(frames) > 20:
-            break
+#         frames.append(frame)
+#         if len(frames) >= 50:
+#             break
+#     cap.release()
 
-    one_frame = frames [20]
-    # tensor, scale, pad_x, pad_y, h, w = detector.preprocess(one_frame)
-    # output = detector.session.run(None, {detector.input_name: tensor})
-    # detector.postprocess(output, scale=scale,pad_x=pad_x, pad_y=pad_y, orig_h=h, orig_w=w)
-    detector.detect(one_frame)
-    cap.release()
+#     for f in frames:
+#         output = detector.detect(f)
+#         print(output)
+
+#         for (x1, y1, x2, y2, conf, cls) in output:
+#             cv2.rectangle(f, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+
+#         cv2.imshow('frame',f)
+#         # print(detector.detect(one_frame))
+#         if cv2.waitKey(1) & 0xFF == ord('q'):
+#             break
+#     cv2.destroyAllWindows()
+
+
+
 
 # if __name__ == "__main__":
 #     detector = OnnxDetector("learning/drone-model.onnx", ["CPUExecutionProvider"])
